@@ -1,0 +1,15 @@
+{
+  "schema_version": "v1",
+  "request_id": "req_01HXAMPLE0000000000000001",
+  "user_id": "user_0001",
+  "input": {
+    "kind": "file",
+    "content_base64": "JVBERi0xLjQKJeLjz9MK",
+    "mime_type": "application/pdf",
+    "filename": "resume.pdf"
+  },
+  "options": {
+    "max_roles": 5,
+    "backend": null
+  }
+}

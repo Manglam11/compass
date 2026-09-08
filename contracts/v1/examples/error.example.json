@@ -1,0 +1,9 @@
+{
+  "schema_version": "v1",
+  "request_id": "req_01HXAMPLE0000000000000002",
+  "error": {
+    "code": "UNSUPPORTED_MIME",
+    "detail": "Only PDF and DOCX files are supported.",
+    "retryable": false
+  }
+}

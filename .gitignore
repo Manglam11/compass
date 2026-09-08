@@ -1,0 +1,20 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Secrets
+.env
+
+# Golden data (may contain real resumes)
+data/golden/*
+!data/golden/.gitkeep
+
+# Generated documents
+*.pdf

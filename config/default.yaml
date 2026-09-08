@@ -1,0 +1,4 @@
+# Non-secret defaults for Compass. Never put secrets in this file —
+# secrets are read from environment variables only (see .env.example).
+environment: development
+log_level: INFO

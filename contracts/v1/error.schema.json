@@ -1,0 +1,61 @@
+{
+  "$defs": {
+    "ErrorCode": {
+      "enum": [
+        "PARSE_FAILED",
+        "UNSUPPORTED_MIME",
+        "EMPTY_DOCUMENT",
+        "TAXONOMY_LOAD_FAILED",
+        "BACKEND_UNAVAILABLE",
+        "INTERNAL_ERROR"
+      ],
+      "title": "ErrorCode",
+      "type": "string"
+    },
+    "ErrorDetail": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/ErrorCode"
+        },
+        "detail": {
+          "title": "Detail",
+          "type": "string"
+        },
+        "retryable": {
+          "title": "Retryable",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "code",
+        "detail",
+        "retryable"
+      ],
+      "title": "ErrorDetail",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "request_id": {
+      "title": "Request Id",
+      "type": "string"
+    },
+    "error": {
+      "$ref": "#/$defs/ErrorDetail"
+    }
+  },
+  "required": [
+    "schema_version",
+    "request_id",
+    "error"
+  ],
+  "title": "ErrorResponse",
+  "type": "object"
+}

@@ -1,0 +1,41 @@
+{
+  "schema_version": "v1",
+  "request_id": "req_01HXAMPLE0000000000000001",
+  "user_id": "user_0001",
+  "generated_at": "2026-09-08T12:00:00Z",
+  "versions": {
+    "taxonomy": "2026.09.01",
+    "extractor": "0.1.0",
+    "prompt": null
+  },
+  "extracted_skills": [
+    {
+      "skill_id": "skill_python",
+      "matched_alias": "Python",
+      "span": [120, 126]
+    },
+    {
+      "skill_id": "skill_sql",
+      "matched_alias": "SQL",
+      "span": [140, 143]
+    }
+  ],
+  "matches": [
+    {
+      "role_id": "role_data_engineer",
+      "display_name": "Data Engineer",
+      "score": 0.82,
+      "core_ratio": 0.75,
+      "matched_skills": ["skill_python", "skill_sql"],
+      "missing_skills": ["skill_airflow"]
+    }
+  ],
+  "excluded_roles": [
+    {
+      "role_id": "role_ml_engineer",
+      "reason": "CORE_GATE_FAILED",
+      "core_ratio": 0.2
+    }
+  ],
+  "warnings": []
+}

@@ -1,0 +1,214 @@
+{
+  "$defs": {
+    "ExcludedRole": {
+      "additionalProperties": false,
+      "properties": {
+        "role_id": {
+          "title": "Role Id",
+          "type": "string"
+        },
+        "reason": {
+          "$ref": "#/$defs/ExclusionReason"
+        },
+        "core_ratio": {
+          "title": "Core Ratio",
+          "type": "number"
+        }
+      },
+      "required": [
+        "role_id",
+        "reason",
+        "core_ratio"
+      ],
+      "title": "ExcludedRole",
+      "type": "object"
+    },
+    "ExclusionReason": {
+      "enum": [
+        "CORE_GATE_FAILED",
+        "NO_SKILL_OVERLAP",
+        "BELOW_SCORE_FLOOR"
+      ],
+      "title": "ExclusionReason",
+      "type": "string"
+    },
+    "ExtractedSkill": {
+      "additionalProperties": false,
+      "properties": {
+        "skill_id": {
+          "title": "Skill Id",
+          "type": "string"
+        },
+        "matched_alias": {
+          "title": "Matched Alias",
+          "type": "string"
+        },
+        "span": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "title": "Span",
+          "type": "array"
+        }
+      },
+      "required": [
+        "skill_id",
+        "matched_alias",
+        "span"
+      ],
+      "title": "ExtractedSkill",
+      "type": "object"
+    },
+    "RoleMatch": {
+      "additionalProperties": false,
+      "properties": {
+        "role_id": {
+          "title": "Role Id",
+          "type": "string"
+        },
+        "display_name": {
+          "title": "Display Name",
+          "type": "string"
+        },
+        "score": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Score",
+          "type": "number"
+        },
+        "core_ratio": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Core Ratio",
+          "type": "number"
+        },
+        "matched_skills": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Matched Skills",
+          "type": "array"
+        },
+        "missing_skills": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missing Skills",
+          "type": "array"
+        }
+      },
+      "required": [
+        "role_id",
+        "display_name",
+        "score",
+        "core_ratio",
+        "matched_skills",
+        "missing_skills"
+      ],
+      "title": "RoleMatch",
+      "type": "object"
+    },
+    "Versions": {
+      "additionalProperties": false,
+      "properties": {
+        "taxonomy": {
+          "title": "Taxonomy",
+          "type": "string"
+        },
+        "extractor": {
+          "title": "Extractor",
+          "type": "string"
+        },
+        "prompt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prompt"
+        }
+      },
+      "required": [
+        "taxonomy",
+        "extractor"
+      ],
+      "title": "Versions",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "request_id": {
+      "title": "Request Id",
+      "type": "string"
+    },
+    "user_id": {
+      "title": "User Id",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "versions": {
+      "$ref": "#/$defs/Versions"
+    },
+    "extracted_skills": {
+      "items": {
+        "$ref": "#/$defs/ExtractedSkill"
+      },
+      "title": "Extracted Skills",
+      "type": "array"
+    },
+    "matches": {
+      "items": {
+        "$ref": "#/$defs/RoleMatch"
+      },
+      "title": "Matches",
+      "type": "array"
+    },
+    "excluded_roles": {
+      "items": {
+        "$ref": "#/$defs/ExcludedRole"
+      },
+      "title": "Excluded Roles",
+      "type": "array"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "request_id",
+    "user_id",
+    "generated_at",
+    "versions",
+    "extracted_skills",
+    "matches",
+    "excluded_roles"
+  ],
+  "title": "Response",
+  "type": "object"
+}

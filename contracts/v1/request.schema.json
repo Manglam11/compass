@@ -1,0 +1,94 @@
+{
+  "$defs": {
+    "Options": {
+      "additionalProperties": false,
+      "properties": {
+        "max_roles": {
+          "default": 5,
+          "maximum": 10,
+          "minimum": 1,
+          "title": "Max Roles",
+          "type": "integer"
+        },
+        "backend": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Backend"
+        }
+      },
+      "title": "Options",
+      "type": "object"
+    },
+    "ResumeInput": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "file",
+          "title": "Kind",
+          "type": "string"
+        },
+        "content_base64": {
+          "title": "Content Base64",
+          "type": "string"
+        },
+        "mime_type": {
+          "enum": [
+            "application/pdf",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          ],
+          "title": "Mime Type",
+          "type": "string"
+        },
+        "filename": {
+          "title": "Filename",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "content_base64",
+        "mime_type",
+        "filename"
+      ],
+      "title": "ResumeInput",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "request_id": {
+      "title": "Request Id",
+      "type": "string"
+    },
+    "user_id": {
+      "title": "User Id",
+      "type": "string"
+    },
+    "input": {
+      "$ref": "#/$defs/ResumeInput"
+    },
+    "options": {
+      "$ref": "#/$defs/Options"
+    }
+  },
+  "required": [
+    "schema_version",
+    "request_id",
+    "user_id",
+    "input"
+  ],
+  "title": "Request",
+  "type": "object"
+}
