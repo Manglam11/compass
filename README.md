@@ -24,6 +24,26 @@ and taxonomy content are built in later milestones.
 - `tests/test_contract_v1.py` — contract tests, loaded from the example JSON
   files.
 
+## Taxonomy
+
+`taxonomy/skills.yaml` and `taxonomy/roles.yaml` define the skill/role
+taxonomy: skills (id, display name, family, aliases) and roles (id, display
+name, and their core/supporting/differentiator skill weights). Both files are
+currently placeholders — real content lands in a later milestone.
+
+The two files are versioned together: `roles.yaml`'s `taxonomy_version` field
+is the version stamped on every recommendation Compass produces, and both
+files' `version` fields must match it — `src/compass/taxonomy/loader.py`
+cross-validates this along with alias uniqueness, id references, and weight
+bucket consistency, collecting every violation into a single error instead of
+stopping at the first one.
+
+Validate the taxonomy files with:
+
+```bash
+uv run python scripts/validate_taxonomy.py
+```
+
 ## Commands
 
 All commands run through `uv` — no pip, no manually activated virtualenvs.
@@ -40,4 +60,7 @@ uv run ruff format .
 
 # Regenerate contracts/v1/*.schema.json from the pydantic models
 uv run python scripts/export_schema.py
+
+# Validate the taxonomy files
+uv run python scripts/validate_taxonomy.py
 ```

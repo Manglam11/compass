@@ -1,0 +1,9 @@
+version: 0.1.0
+taxonomy_version: 0.1.0
+roles:
+  - id: ml_engineer
+    display_name: ML Engineer
+    core: {python: 3}
+    supporting: {docker: 2}
+    differentiator: {}
+    min_core_ratio: 0.7

@@ -1,0 +1,10 @@
+version: 0.1.0
+skills:
+  - id: docker
+    display_name: Docker
+    family: deployment
+    aliases: [docker, dockerfile, dockerised, dockerized, containerize, containerization]
+  - id: python
+    display_name: Python
+    family: language
+    aliases: [python, python3, py]
