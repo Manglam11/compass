@@ -2,6 +2,10 @@
 
 All violations are collected up front and raised together in a single
 LabelError, rather than failing on the first one found.
+
+require_final=True is the guard evaluation call sites must use: a draft
+label is an error, not a skip, so a partially labelled resume can never
+be silently scored as complete.
 """
 
 from __future__ import annotations
@@ -42,7 +46,9 @@ def _find_duplicates(values: list[str]) -> set[str]:
     return dupes
 
 
-def load_labels(directory: Path, taxonomy: Taxonomy | None = None) -> list[ResumeLabel]:
+def load_labels(
+    directory: Path, taxonomy: Taxonomy | None = None, require_final: bool = False
+) -> list[ResumeLabel]:
     if taxonomy is None:
         taxonomy = load_taxonomy(DEFAULT_SKILLS_PATH, DEFAULT_ROLES_PATH)
 
@@ -59,6 +65,9 @@ def load_labels(directory: Path, taxonomy: Taxonomy | None = None) -> list[Resum
         except (ValidationError, yaml.YAMLError) as exc:
             errors.append(f"{path.name}: schema violation: {exc}")
             continue
+
+        if require_final and label.status != "final":
+            errors.append(f"{path.name}: label status is '{label.status}', final labels required")
 
         for skill_id in label.skills_present:
             if skill_id not in taxonomy.skills:

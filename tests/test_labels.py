@@ -66,6 +66,7 @@ def valid_label(**overrides) -> str:
     fields = {
         "resume_id": "prac_001",
         "set": "practice",
+        "status": "final",
         "sha": SHA_A,
         "file_name": "prac_001.pdf",
         "taxonomy_version": "0.1.0",
@@ -80,6 +81,7 @@ label_version: 1
 resume_id: {fields["resume_id"]}
 set: {fields["set"]}
 source: self
+status: {fields["status"]}
 file_name: {fields["file_name"]}
 file_sha256: "{fields["sha"]}"
 format: pdf
@@ -111,13 +113,60 @@ def test_valid_label_passes(tmp_path: Path):
 def test_schema_violation_collected(tmp_path: Path):
     taxonomy = make_taxonomy(tmp_path)
     labels_dir = tmp_path / "labels"
-    write_label(labels_dir, "practice", "prac_001.yaml", valid_label(skills_present="[]"))
+    write_label(
+        labels_dir,
+        "practice",
+        "prac_001.yaml",
+        valid_label(skills_present="[]", status="final"),
+    )
 
     with pytest.raises(LabelError) as exc_info:
         load_labels(labels_dir, taxonomy=taxonomy)
     message = str(exc_info.value)
     assert "schema violation" in message
     assert "prac_001.yaml" in message
+
+
+def test_draft_label_allows_empty_skills_present(tmp_path: Path):
+    taxonomy = make_taxonomy(tmp_path)
+    labels_dir = tmp_path / "labels"
+    write_label(
+        labels_dir,
+        "practice",
+        "prac_001.yaml",
+        valid_label(skills_present="[]", status="draft"),
+    )
+
+    labels = load_labels(labels_dir, taxonomy=taxonomy)
+
+    assert len(labels) == 1
+    assert labels[0].status == "draft"
+    assert labels[0].skills_present == []
+
+
+def test_require_final_rejects_draft_label(tmp_path: Path):
+    taxonomy = make_taxonomy(tmp_path)
+    labels_dir = tmp_path / "labels"
+    write_label(
+        labels_dir,
+        "practice",
+        "prac_001.yaml",
+        valid_label(skills_present="[]", status="draft"),
+    )
+
+    with pytest.raises(LabelError, match="label status is 'draft', final labels required"):
+        load_labels(labels_dir, taxonomy=taxonomy, require_final=True)
+
+
+def test_require_final_accepts_final_label(tmp_path: Path):
+    taxonomy = make_taxonomy(tmp_path)
+    labels_dir = tmp_path / "labels"
+    write_label(labels_dir, "practice", "prac_001.yaml", valid_label(status="final"))
+
+    labels = load_labels(labels_dir, taxonomy=taxonomy, require_final=True)
+
+    assert len(labels) == 1
+    assert labels[0].status == "final"
 
 
 def test_unknown_skill_id_rejected(tmp_path: Path):

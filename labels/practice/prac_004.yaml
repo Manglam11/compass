@@ -1,0 +1,17 @@
+label_version: 1
+resume_id: prac_004
+set: practice
+source: self
+status: draft
+file_name: prac_004.pdf
+file_sha256: 0a96f02a0e06c0a47055b5ff1fab7ca85d2b12e1ffdafd87c009b789256d519e
+format: pdf
+layout: other
+taxonomy_version: 0.5.1
+labeller: ''
+labelled_at: '2026-09-09'
+skills_present: []
+skills_ambiguous: []
+roles_fit: []
+roles_should_exclude: []
+notes: ''

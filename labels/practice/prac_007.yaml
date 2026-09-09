@@ -1,0 +1,17 @@
+label_version: 1
+resume_id: prac_007
+set: practice
+source: self
+status: draft
+file_name: prac_007.docx
+file_sha256: 87de5d155f0210e3dc7d6fe1a0acdc865451805ae7dfe68a91ec1f2f386460a7
+format: docx
+layout: other
+taxonomy_version: 0.5.1
+labeller: ''
+labelled_at: '2026-09-09'
+skills_present: []
+skills_ambiguous: []
+roles_fit: []
+roles_should_exclude: []
+notes: ''

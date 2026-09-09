@@ -1,0 +1,17 @@
+label_version: 1
+resume_id: prac_006
+set: practice
+source: self
+status: draft
+file_name: prac_006.pdf
+file_sha256: 39a5b73f60e9cb4e1882d7c12a763ae34d4a235721bf9f98b81da4e7ff845dfd
+format: pdf
+layout: other
+taxonomy_version: 0.5.1
+labeller: ''
+labelled_at: '2026-09-09'
+skills_present: []
+skills_ambiguous: []
+roles_fit: []
+roles_should_exclude: []
+notes: ''
