@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from compass.match.scorer import score_roles
 from compass.taxonomy.loader import WEIGHT_BUCKETS, load_taxonomy
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -83,3 +84,23 @@ def test_every_min_core_ratio_is_between_half_and_eighty_percent():
         assert 0.5 <= role.min_core_ratio <= 0.8, (
             f"role '{role.id}' has min_core_ratio {role.min_core_ratio}"
         )
+
+
+def test_backend_developer_core_gate_clears_with_python_postgresql_docker():
+    taxonomy = load_taxonomy(REAL_SKILLS_PATH, REAL_ROLES_PATH)
+    result = score_roles(["python", "postgresql", "docker"], taxonomy)
+
+    matched_ids = {role.role_id for role in result.matched}
+    excluded_ids = {excluded.role_id for excluded in result.excluded}
+    assert "backend_developer" in matched_ids
+    assert "backend_developer" not in excluded_ids
+
+
+def test_backend_developer_core_gate_fails_with_python_postgresql_only():
+    taxonomy = load_taxonomy(REAL_SKILLS_PATH, REAL_ROLES_PATH)
+    result = score_roles(["python", "postgresql"], taxonomy)
+
+    matched_ids = {role.role_id for role in result.matched}
+    excluded_ids = {excluded.role_id for excluded in result.excluded}
+    assert "backend_developer" not in matched_ids
+    assert "backend_developer" in excluded_ids

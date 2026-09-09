@@ -1,5 +1,5 @@
-version: 0.5.0
-taxonomy_version: 0.5.0
+version: 0.5.1
+taxonomy_version: 0.5.1
 roles:
   - id: data_analyst
     display_name: Data Analyst
@@ -33,8 +33,8 @@ roles:
 
   - id: backend_developer
     display_name: Backend Developer
-    core: {python: 3, rest_api: 3, postgresql: 2}
-    supporting: {fastapi: 2, flask: 2, django: 2, docker: 2, redis: 1, mysql: 1}
+    core: {python: 3, postgresql: 2, docker: 2}
+    supporting: {fastapi: 2, flask: 2, django: 2, rest_api: 2, redis: 1, mysql: 1}
     differentiator: {javascript: 1, linux: 1, unit_testing: 1, ci_cd: 1, git: 1}
     min_core_ratio: 0.7
 
