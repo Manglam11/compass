@@ -11,6 +11,7 @@ dependencies = [
     "pydantic>=2.13.5",
     "pydantic-settings>=2.15.0",
     "pymupdf>=1.28.2",
+    "python-docx>=1.2.0",
     "pyyaml>=6.0.3",
     "spacy>=3.8.16",
     "streamlit>=1.63.0",
