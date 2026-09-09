@@ -59,9 +59,9 @@ def write_pair(tmp_path: Path, skills_yaml: str, roles_yaml: str) -> tuple[Path,
 
 def test_real_taxonomy_files_load_successfully():
     taxonomy = load_taxonomy(REAL_SKILLS_PATH, REAL_ROLES_PATH)
-    assert taxonomy.taxonomy_version == "0.2.0"
+    assert taxonomy.taxonomy_version == "0.3.0"
     assert {"docker", "python"} <= set(taxonomy.skills)
-    assert set(taxonomy.roles) == {"ml_engineer"}
+    assert "ml_engineer" in taxonomy.roles
 
 
 def test_round_trip_load_dump_load_identical(tmp_path: Path):

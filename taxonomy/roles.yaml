@@ -1,9 +1,68 @@
-version: 0.2.0
-taxonomy_version: 0.2.0
+version: 0.3.0
+taxonomy_version: 0.3.0
 roles:
+  - id: data_analyst
+    display_name: Data Analyst
+    core: {sql: 3, data_visualisation: 3, excel: 2}
+    supporting: {python: 2, pandas: 2, statistics: 2, data_modelling: 1}
+    differentiator: {tableau: 1, power_bi: 1, dbt: 1}
+    min_core_ratio: 0.6
+
+  - id: data_scientist
+    display_name: Data Scientist
+    core: {python: 3, statistics: 3, scikit_learn: 3, model_evaluation: 2}
+    supporting: {pandas: 2, numpy: 2, sql: 2, feature_engineering: 2, data_visualisation: 1}
+    differentiator: {time_series: 1, nlp: 1, experiment_tracking: 1}
+    min_core_ratio: 0.75
+
   - id: ml_engineer
     display_name: ML Engineer
-    core: {python: 3}
-    supporting: {docker: 2}
-    differentiator: {}
+    core: {python: 3, pytorch: 3, model_evaluation: 3, feature_engineering: 2}
+    supporting: {tensorflow: 2, scikit_learn: 2, docker: 2, mlops: 2, model_serving: 2}
+    differentiator: {kubernetes: 1, aws: 1, experiment_tracking: 1}
+    min_core_ratio: 0.75
+
+  - id: data_engineer
+    display_name: Data Engineer
+    core: {sql: 3, etl: 3, python: 2, data_modelling: 2}
+    supporting: {airflow: 2, spark: 2, postgresql: 2, dbt: 2}
+    differentiator: {aws: 1, gcp: 1, kubernetes: 1, mongodb: 1}
+    min_core_ratio: 0.7
+
+  - id: backend_developer
+    display_name: Backend Developer
+    core: {python: 3, rest_api: 3, postgresql: 2}
+    supporting: {fastapi: 2, flask: 2, django: 2, docker: 2, redis: 1, mysql: 1}
+    differentiator: {javascript: 1, linux: 1, unit_testing: 1, ci_cd: 1}
+    min_core_ratio: 0.7
+
+  - id: devops_mlops_engineer
+    display_name: DevOps / MLOps Engineer
+    core: {docker: 3, ci_cd: 3, linux: 2}
+    supporting:
+      {
+        kubernetes: 2,
+        terraform: 2,
+        bash: 2,
+        mlops: 2,
+        logging_monitoring: 2,
+        aws: 2,
+        gcp: 2,
+        azure: 2,
+      }
+    differentiator: {python: 1, model_serving: 1, airflow: 1}
+    min_core_ratio: 0.7
+
+  - id: automation_scraping_engineer
+    display_name: Automation & Scraping Engineer
+    core: {python: 3, web_scraping: 3, api_integration: 2}
+    supporting: {selenium: 2, beautifulsoup: 2, playwright: 2, cron: 1, postgresql: 1}
+    differentiator: {docker: 1, bash: 1, linux: 1}
+    min_core_ratio: 0.6
+
+  - id: ai_genai_engineer
+    display_name: AI / GenAI Engineer
+    core: {python: 3, llm_integration: 3, rag: 2, prompt_engineering: 2}
+    supporting: {fastapi: 2, nlp: 2, model_evaluation: 2, streamlit: 1}
+    differentiator: {docker: 1, aws: 1, experiment_tracking: 1}
     min_core_ratio: 0.7
