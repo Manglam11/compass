@@ -1,10 +1,305 @@
-version: 0.1.0
+version: 0.2.0
 skills:
-  - id: docker
-    display_name: Docker
-    family: deployment
-    aliases: [docker, dockerfile, dockerised, dockerized, containerize, containerization]
+  # language
   - id: python
     display_name: Python
     family: language
     aliases: [python, python3, py]
+  - id: sql
+    display_name: SQL
+    family: language
+    aliases: [sql, structured query language, t-sql, tsql, pl/sql, plsql]
+  - id: javascript
+    display_name: JavaScript
+    family: language
+    aliases: [javascript, js, ecmascript, es6, node.js, nodejs, node]
+  - id: typescript
+    display_name: TypeScript
+    family: language
+    aliases: [typescript, ts]
+  - id: java
+    display_name: Java
+    family: language
+    aliases: [java, core java, java se]
+  - id: bash
+    display_name: Bash
+    family: language
+    aliases: [bash, bash scripting, shell scripting, shell script, sh]
+  - id: r
+    display_name: R
+    family: language
+    aliases: [r, r language, r programming, rlang, rstats]
+
+  # data
+  - id: pandas
+    display_name: Pandas
+    family: data
+    aliases: [pandas, pandas library, dataframes, dataframe]
+  - id: numpy
+    display_name: NumPy
+    family: data
+    aliases: [numpy, np, numerical python]
+  - id: postgresql
+    display_name: PostgreSQL
+    family: data
+    aliases: [postgresql, postgres, psql, postgre sql]
+  - id: mysql
+    display_name: MySQL
+    family: data
+    aliases: [mysql, my sql]
+  - id: mongodb
+    display_name: MongoDB
+    family: data
+    aliases: [mongodb, mongo, mongo db]
+  - id: redis
+    display_name: Redis
+    family: data
+    aliases: [redis, redis cache]
+  - id: spark
+    display_name: Apache Spark
+    family: data
+    aliases: [spark, apache spark, pyspark, spark sql]
+  - id: airflow
+    display_name: Apache Airflow
+    family: data
+    aliases: [airflow, apache airflow, airflow dag, dags]
+  - id: dbt
+    display_name: dbt
+    family: data
+    aliases: [dbt, data build tool, dbt core]
+  - id: data_modelling
+    display_name: Data Modelling
+    family: data
+    aliases:
+      [
+        data_modelling,
+        data modelling,
+        data modeling,
+        dimensional modelling,
+        dimensional modeling,
+        schema design,
+        star schema,
+      ]
+  - id: etl
+    display_name: ETL
+    family: data
+    aliases: [etl, extract transform load, elt, data pipeline, data pipelines]
+  - id: data_visualisation
+    display_name: Data Visualisation
+    family: data
+    aliases:
+      [
+        data_visualisation,
+        data visualisation,
+        data visualization,
+        dataviz,
+        matplotlib,
+        seaborn,
+        plotly,
+      ]
+  - id: excel
+    display_name: Excel
+    family: data
+    aliases: [excel, microsoft excel, spreadsheets, vlookup, pivot tables]
+  - id: tableau
+    display_name: Tableau
+    family: data
+    aliases: [tableau, tableau desktop, tableau server]
+  - id: power_bi
+    display_name: Power BI
+    family: data
+    aliases: [power_bi, power bi, powerbi, ms power bi]
+
+  # ml
+  - id: scikit_learn
+    display_name: scikit-learn
+    family: ml
+    aliases: [scikit_learn, scikit-learn, sklearn, scikit learn]
+  - id: tensorflow
+    display_name: TensorFlow
+    family: ml
+    aliases: [tensorflow, tensor flow, tf, keras]
+  - id: pytorch
+    display_name: PyTorch
+    family: ml
+    aliases: [pytorch, py torch, torch]
+  - id: xgboost
+    display_name: XGBoost
+    family: ml
+    aliases: [xgboost, xg boost, gradient boosting, gradient boosted trees, gbm]
+  - id: feature_engineering
+    display_name: Feature Engineering
+    family: ml
+    aliases: [feature_engineering, feature engineering, feature selection, feature extraction]
+  - id: model_evaluation
+    display_name: Model Evaluation
+    family: ml
+    aliases:
+      [model_evaluation, model evaluation, model validation, cross validation, cross-validation]
+  - id: nlp
+    display_name: Natural Language Processing
+    family: ml
+    aliases: [nlp, natural language processing, spacy, nltk, text mining]
+  - id: computer_vision
+    display_name: Computer Vision
+    family: ml
+    aliases: [computer_vision, computer vision, cv, opencv, image processing]
+  - id: time_series
+    display_name: Time Series
+    family: ml
+    aliases: [time_series, time series, time series analysis, forecasting, time series forecasting]
+  - id: statistics
+    display_name: Statistics
+    family: ml
+    aliases: [statistics, statistical analysis, stats, hypothesis testing, probability]
+  - id: experiment_tracking
+    display_name: Experiment Tracking
+    family: ml
+    aliases: [experiment_tracking, experiment tracking, mlflow, weights and biases, wandb]
+  - id: llm_integration
+    display_name: LLM Integration
+    family: ml
+    aliases:
+      [
+        llm_integration,
+        llm integration,
+        openai api,
+        anthropic api,
+        gemini api,
+        langchain,
+        llamaindex,
+      ]
+  - id: rag
+    display_name: Retrieval-Augmented Generation
+    family: ml
+    aliases:
+      [
+        rag,
+        retrieval augmented generation,
+        retrieval-augmented generation,
+        vector search,
+        vector database,
+      ]
+  - id: prompt_engineering
+    display_name: Prompt Engineering
+    family: ml
+    aliases: [prompt_engineering, prompt engineering, prompt design, prompt tuning]
+
+  # deployment
+  - id: docker
+    display_name: Docker
+    family: deployment
+    aliases: [docker, dockerfile, dockerised, dockerized, containerize, containerization]
+  - id: kubernetes
+    display_name: Kubernetes
+    family: deployment
+    aliases: [kubernetes, k8s, kube, container orchestration]
+  - id: fastapi
+    display_name: FastAPI
+    family: deployment
+    aliases: [fastapi, fast api]
+  - id: flask
+    display_name: Flask
+    family: deployment
+    aliases: [flask, flask api]
+  - id: django
+    display_name: Django
+    family: deployment
+    aliases: [django, django rest framework, drf]
+  - id: rest_api
+    display_name: REST API
+    family: deployment
+    aliases: [rest_api, rest api, restful api, restful apis, rest apis, api design]
+  - id: streamlit
+    display_name: Streamlit
+    family: deployment
+    aliases: [streamlit, streamlit app, streamlit dashboard]
+  - id: model_serving
+    display_name: Model Serving
+    family: deployment
+    aliases: [model_serving, model serving, model deployment, inference api, serving models]
+  - id: mlops
+    display_name: MLOps
+    family: deployment
+    aliases: [mlops, ml ops, ml operations, machine learning operations]
+
+  # cloud
+  - id: aws
+    display_name: AWS
+    family: cloud
+    aliases: [aws, amazon web services, ec2, s3, lambda, sagemaker]
+  - id: gcp
+    display_name: Google Cloud Platform
+    family: cloud
+    aliases: [gcp, google cloud, google cloud platform, bigquery, vertex ai]
+  - id: azure
+    display_name: Microsoft Azure
+    family: cloud
+    aliases: [azure, microsoft azure, azure ml, azure functions]
+  - id: terraform
+    display_name: Terraform
+    family: cloud
+    aliases: [terraform, infrastructure as code, iac, terraform hcl]
+  - id: linux
+    display_name: Linux
+    family: cloud
+    aliases: [linux, unix, linux administration, command line, cli]
+
+  # automation
+  - id: selenium
+    display_name: Selenium
+    family: automation
+    aliases: [selenium, selenium webdriver, selenium automation]
+  - id: web_scraping
+    display_name: Web Scraping
+    family: automation
+    aliases: [web_scraping, web scraping, scraping, scrapy, crawler]
+  - id: beautifulsoup
+    display_name: Beautiful Soup
+    family: automation
+    aliases: [beautifulsoup, beautiful soup, bs4]
+  - id: playwright
+    display_name: Playwright
+    family: automation
+    aliases: [playwright, playwright automation]
+  - id: cron
+    display_name: Cron
+    family: automation
+    aliases: [cron, cron job, cron jobs, crontab, scheduled tasks]
+  - id: api_integration
+    display_name: API Integration
+    family: automation
+    aliases: [api_integration, api integration, third party api, third-party api, api consumption]
+
+  # practice
+  - id: git
+    display_name: Git
+    family: practice
+    aliases: [git, github, gitlab, version control, git version control]
+  - id: ci_cd
+    display_name: CI/CD
+    family: practice
+    aliases:
+      [
+        ci_cd,
+        ci/cd,
+        cicd,
+        continuous integration,
+        continuous deployment,
+        github actions,
+        jenkins,
+        gitlab ci,
+        azure devops,
+      ]
+  - id: unit_testing
+    display_name: Unit Testing
+    family: practice
+    aliases: [unit_testing, unit testing, unit tests, pytest, test driven development, tdd]
+  - id: code_review
+    display_name: Code Review
+    family: practice
+    aliases: [code_review, code review, code reviews, pull request review, peer review]
+  - id: logging_monitoring
+    display_name: Logging & Monitoring
+    family: practice
+    aliases: [logging_monitoring, logging, monitoring, observability, alerting]
