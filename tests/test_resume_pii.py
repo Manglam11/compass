@@ -92,6 +92,71 @@ def test_clean_fixture_reports_nothing():
     assert find_pii(text) == []
 
 
+def test_mailto_target_is_its_own_kind():
+    text = "Reach out: mailto:jane.doe@example.com"
+    matches = find_pii(text)
+
+    assert [m.kind for m in matches] == ["mailto"]
+    assert matches[0].value == "mailto:jane.doe@example.com"
+
+
+def test_mailto_negative_plain_email_stays_email_kind():
+    text = "Email jane.doe@example.com directly."
+    matches = find_pii(text)
+
+    assert [m.kind for m in matches] == ["email"]
+
+
+def test_linkedin_shorthand_variants_detected():
+    for text in [
+        "linkedin/janedoe",
+        "linkedin.com/janedoe",
+        "www.linkedin/janedoe",
+        "in/jane-doe123",
+    ]:
+        matches = find_pii(text)
+        assert [m.kind for m in matches] == ["linkedin_shorthand"], text
+
+
+def test_linkedin_shorthand_negative_common_words_files_and_versions():
+    text = (
+        "Comfortable specializing in/around cloud tooling. "
+        "See report.pdf, built with python 3.11."
+    )
+
+    assert find_pii(text) == []
+
+
+def test_github_shorthand_detected():
+    text = "Code: github/janedoe"
+    matches = find_pii(text)
+
+    assert [m.kind for m in matches] == ["github_shorthand"]
+
+
+def test_github_shorthand_negative_full_url_files_and_versions():
+    text = "See notes.md and requirements.txt (v3.11); nothing shorthand here."
+
+    assert find_pii(text) == []
+
+
+def test_bare_domain_detected():
+    text = "Portfolio: janedoe.dev"
+    matches = find_pii(text)
+
+    assert [m.kind for m in matches] == ["domain"]
+    assert matches[0].value == "janedoe.dev"
+
+
+def test_bare_domain_negative_filenames_and_versions():
+    text = (
+        "Attachments: resume.pdf, notes.md, script.py, requirements.txt, "
+        "data.json, config.yaml, log.csv. Requires python 3.11."
+    )
+
+    assert find_pii(text) == []
+
+
 def test_multiple_pii_classes_in_one_document():
     text = (
         "Jane Doe\n"
