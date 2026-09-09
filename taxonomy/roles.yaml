@@ -1,5 +1,5 @@
-version: 0.4.0
-taxonomy_version: 0.4.0
+version: 0.5.0
+taxonomy_version: 0.5.0
 roles:
   - id: data_analyst
     display_name: Data Analyst
@@ -20,7 +20,8 @@ roles:
     display_name: ML Engineer
     core: {python: 3, pytorch: 3, model_evaluation: 3, feature_engineering: 2}
     supporting: {tensorflow: 2, scikit_learn: 2, docker: 2, mlops: 2, model_serving: 2}
-    differentiator: {kubernetes: 1, aws: 1, experiment_tracking: 1, computer_vision: 1}
+    differentiator:
+      {kubernetes: 1, aws: 1, experiment_tracking: 1, computer_vision: 1, vector_db: 1}
     min_core_ratio: 0.75
 
   - id: data_engineer
@@ -64,6 +65,7 @@ roles:
   - id: ai_genai_engineer
     display_name: AI / GenAI Engineer
     core: {python: 3, llm_integration: 3, rag: 2, prompt_engineering: 2}
-    supporting: {fastapi: 2, nlp: 2, model_evaluation: 2, streamlit: 1}
+    supporting:
+      {fastapi: 2, nlp: 2, model_evaluation: 2, streamlit: 1, vector_db: 2, agent_frameworks: 2}
     differentiator: {docker: 1, aws: 1, experiment_tracking: 1}
     min_core_ratio: 0.7

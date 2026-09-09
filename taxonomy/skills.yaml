@@ -1,4 +1,4 @@
-version: 0.4.0
+version: 0.5.0
 skills:
   # language
   - id: python
@@ -71,7 +71,18 @@ skills:
   - id: etl
     display_name: ETL
     family: data
-    aliases: [etl, extract transform load, elt, data pipeline, data pipelines]
+    aliases:
+      [
+        etl,
+        extract transform load,
+        elt,
+        data pipeline,
+        data pipelines,
+        alembic,
+        sqlalchemy,
+        ingestion pipeline,
+        migration script,
+      ]
   - id: data_visualisation
     display_name: Data Visualisation
     family: data
@@ -97,6 +108,22 @@ skills:
     display_name: Power BI
     family: data
     aliases: [power_bi, power bi, powerbi, ms power bi]
+  - id: vector_db
+    display_name: Vector Database
+    family: data
+    aliases:
+      [
+        vector_db,
+        qdrant,
+        pinecone,
+        weaviate,
+        chroma,
+        chromadb,
+        faiss,
+        vector store,
+        vector database,
+        embedding store,
+      ]
 
   # ml
   - id: scikit_learn
@@ -106,7 +133,7 @@ skills:
   - id: tensorflow
     display_name: TensorFlow
     family: ml
-    aliases: [tensorflow, tensor flow, tf, keras]
+    aliases: [tensorflow, tensor flow]
   - id: pytorch
     display_name: PyTorch
     family: ml
@@ -154,7 +181,6 @@ skills:
         openai api,
         anthropic api,
         gemini api,
-        langchain,
         llamaindex,
       ]
   - id: rag
@@ -166,12 +192,37 @@ skills:
         retrieval augmented generation,
         retrieval-augmented generation,
         vector search,
-        vector database,
       ]
   - id: prompt_engineering
     display_name: Prompt Engineering
     family: ml
-    aliases: [prompt_engineering, prompt engineering, prompt design, prompt tuning]
+    aliases:
+      [
+        prompt_engineering,
+        prompt engineering,
+        prompt design,
+        prompt tuning,
+        query rewriting,
+        prompt template,
+        system prompt,
+        few-shot,
+      ]
+
+  # genai
+  - id: agent_frameworks
+    display_name: Agent Frameworks
+    family: genai
+    aliases:
+      [
+        agent_frameworks,
+        langgraph,
+        langchain,
+        crewai,
+        autogen,
+        agent loop,
+        agentic workflow,
+        tool calling,
+      ]
 
   # deployment
   - id: docker
@@ -197,7 +248,20 @@ skills:
   - id: rest_api
     display_name: REST API
     family: deployment
-    aliases: [rest_api, rest api, restful api, restful apis, rest apis, api design]
+    aliases:
+      [
+        rest_api,
+        rest api,
+        restful api,
+        restful apis,
+        rest apis,
+        api design,
+        rest,
+        restful,
+        api endpoint,
+        endpoints,
+        rest endpoint,
+      ]
   - id: streamlit
     display_name: Streamlit
     family: deployment
@@ -231,7 +295,7 @@ skills:
   - id: linux
     display_name: Linux
     family: cloud
-    aliases: [linux, unix, linux administration, command line, cli]
+    aliases: [linux, unix, linux administration, command line, cli, shell, ubuntu]
 
   # automation
   - id: selenium

@@ -10,9 +10,18 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 REAL_SKILLS_PATH = REPO_ROOT / "taxonomy" / "skills.yaml"
 REAL_ROLES_PATH = REPO_ROOT / "taxonomy" / "roles.yaml"
 
-ALLOWED_FAMILIES = {"language", "data", "ml", "deployment", "cloud", "automation", "practice"}
+ALLOWED_FAMILIES = {
+    "language",
+    "data",
+    "ml",
+    "genai",
+    "deployment",
+    "cloud",
+    "automation",
+    "practice",
+}
 
-EXPECTED_SKILL_COUNT = 57
+EXPECTED_SKILL_COUNT = 59
 EXPECTED_ROLE_COUNT = 8
 
 
