@@ -15,6 +15,7 @@ from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
 from compass.extract.pdf_text import extract_text as extract_pdf_text
+from compass.resume_intake.names import compile_name_pattern
 from compass.resume_intake.redact import SameDirectoryError, redact_directory, scan_directory
 
 
@@ -242,5 +243,37 @@ def test_round_trip_every_pii_class_leaves_zero_findings(tmp_path: Path):
     redact_directory(input_dir, output_dir, dry_run=False)
 
     rescan_results = scan_directory(output_dir)
+    for file_name in ("resume.pdf", "resume.docx"):
+        assert sum(rescan_results[file_name].values()) == 0, rescan_results[file_name]
+
+
+def test_round_trip_names_and_pii_together_leaves_zero_findings(tmp_path: Path):
+    """Same gate as above, but with --names-file-style name redaction on
+    top: a fixture with a name (full form and first-name-alone) plus every
+    PII class, in both formats, must scan clean once redacted with the
+    compiled name pattern passed through."""
+    input_dir = tmp_path / "in"
+    output_dir = tmp_path / "out"
+    input_dir.mkdir()
+
+    lines = [
+        "Nick Miller",
+        "Nick led the payments migration.",
+        "Miller's team shipped on time.",
+        "nick.miller@example.com",
+        "+91 98765 43210",
+        "linkedin.com/in/nickmiller",
+        "github.com/nickmiller",
+        "https://example.com/portfolio",
+    ]
+
+    _make_pdf(input_dir / "resume.pdf", lines)
+    _make_docx(input_dir / "resume.docx", lines)
+
+    name_pattern = compile_name_pattern(["Nick Miller"])
+
+    redact_directory(input_dir, output_dir, dry_run=False, name_pattern=name_pattern)
+
+    rescan_results = scan_directory(output_dir, name_pattern)
     for file_name in ("resume.pdf", "resume.docx"):
         assert sum(rescan_results[file_name].values()) == 0, rescan_results[file_name]

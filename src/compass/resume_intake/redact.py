@@ -14,12 +14,14 @@ run (which is not a direct child of the paragraph and so invisible to
 run(s) that make them up. A hyperlink's *target* (the relationship, e.g. a
 mailto: link or a personal-site URL) is checked and redacted independently
 of its display text, since a redacted display label can still point at a
-live leak underneath. Name redaction is out of scope; only PII spans
-matched by `find_pii` are touched.
+live leak underneath. Names are redacted too, but only when a compiled
+`name_pattern` (from `compass.resume_intake.names`) is passed in — there is
+no automatic name detection.
 """
 
 from __future__ import annotations
 
+import re
 from collections import Counter
 from pathlib import Path
 
@@ -35,24 +37,26 @@ class SameDirectoryError(Exception):
     pass
 
 
-def _scan_pdf_counts(path: Path) -> Counter[str]:
+def _scan_pdf_counts(path: Path, name_pattern: re.Pattern[str] | None) -> Counter[str]:
     counts: Counter[str] = Counter()
     doc = pymupdf.open(path)
     try:
         for page in doc:
-            for match in find_pii(page.get_text()):
+            for match in find_pii(page.get_text(), name_pattern):
                 counts[match.kind] += 1
     finally:
         doc.close()
     return counts
 
 
-def _redact_pdf(input_path: Path, output_path: Path) -> Counter[str]:
+def _redact_pdf(
+    input_path: Path, output_path: Path, name_pattern: re.Pattern[str] | None
+) -> Counter[str]:
     counts: Counter[str] = Counter()
     doc = pymupdf.open(input_path)
     try:
         for page in doc:
-            for match in find_pii(page.get_text()):
+            for match in find_pii(page.get_text(), name_pattern):
                 rects = page.search_for(match.value)
                 if not rects:
                     continue
@@ -123,11 +127,13 @@ def _run_atoms(paragraph):
     return atoms
 
 
-def _redact_hyperlink_target(hyperlink: Hyperlink, counts: Counter[str]) -> None:
+def _redact_hyperlink_target(
+    hyperlink: Hyperlink, counts: Counter[str], name_pattern: re.Pattern[str] | None
+) -> None:
     address = hyperlink.address
     if not address:
         return
-    matches = find_pii(address)
+    matches = find_pii(address, name_pattern)
     if not matches:
         return
     new_address = address
@@ -139,28 +145,30 @@ def _redact_hyperlink_target(hyperlink: Hyperlink, counts: Counter[str]) -> None
         hyperlink.part.rels[rId]._target = new_address
 
 
-def _scan_paragraph(paragraph, counts: Counter[str]) -> None:
-    for match in find_pii(paragraph.text):
+def _scan_paragraph(paragraph, counts: Counter[str], name_pattern: re.Pattern[str] | None) -> None:
+    for match in find_pii(paragraph.text, name_pattern):
         counts[match.kind] += 1
     for hyperlink in paragraph.hyperlinks:
-        for match in find_pii(hyperlink.address):
+        for match in find_pii(hyperlink.address, name_pattern):
             counts[match.kind] += 1
 
 
-def _scan_docx_counts(path: Path) -> Counter[str]:
+def _scan_docx_counts(path: Path, name_pattern: re.Pattern[str] | None) -> Counter[str]:
     counts: Counter[str] = Counter()
     document = docx.Document(str(path))
     for paragraph in _document_paragraphs(document):
-        _scan_paragraph(paragraph, counts)
+        _scan_paragraph(paragraph, counts, name_pattern)
     return counts
 
 
-def _redact_paragraph(paragraph, counts: Counter[str]) -> None:
+def _redact_paragraph(
+    paragraph, counts: Counter[str], name_pattern: re.Pattern[str] | None
+) -> None:
     runs = _run_atoms(paragraph)
     if runs:
         texts = [run.text for run in runs]
         full_text = "".join(texts)
-        matches = find_pii(full_text)
+        matches = find_pii(full_text, name_pattern)
 
         if matches:
             offsets: list[tuple[int, int]] = []
@@ -187,19 +195,23 @@ def _redact_paragraph(paragraph, counts: Counter[str]) -> None:
                 counts[match.kind] += 1
 
     for hyperlink in paragraph.hyperlinks:
-        _redact_hyperlink_target(hyperlink, counts)
+        _redact_hyperlink_target(hyperlink, counts, name_pattern)
 
 
-def _redact_docx(input_path: Path, output_path: Path) -> Counter[str]:
+def _redact_docx(
+    input_path: Path, output_path: Path, name_pattern: re.Pattern[str] | None
+) -> Counter[str]:
     counts: Counter[str] = Counter()
     document = docx.Document(str(input_path))
     for paragraph in _document_paragraphs(document):
-        _redact_paragraph(paragraph, counts)
+        _redact_paragraph(paragraph, counts, name_pattern)
     document.save(output_path)
     return counts
 
 
-def scan_directory(directory: Path) -> dict[str, Counter[str]]:
+def scan_directory(
+    directory: Path, name_pattern: re.Pattern[str] | None = None
+) -> dict[str, Counter[str]]:
     """Report suspected-PII counts per file without modifying anything.
 
     Uses the same detection paths (paragraphs, tables, headers/footers,
@@ -211,16 +223,25 @@ def scan_directory(directory: Path) -> dict[str, Counter[str]]:
     results: dict[str, Counter[str]] = {}
     for path in paths:
         is_pdf = path.suffix.lower() == ".pdf"
-        results[path.name] = _scan_pdf_counts(path) if is_pdf else _scan_docx_counts(path)
+        results[path.name] = (
+            _scan_pdf_counts(path, name_pattern)
+            if is_pdf
+            else _scan_docx_counts(path, name_pattern)
+        )
     return results
 
 
-def redact_directory(input_dir: Path, output_dir: Path, dry_run: bool) -> dict[str, Counter[str]]:
+def redact_directory(
+    input_dir: Path,
+    output_dir: Path,
+    dry_run: bool,
+    name_pattern: re.Pattern[str] | None = None,
+) -> dict[str, Counter[str]]:
     if input_dir.resolve() == output_dir.resolve():
         raise SameDirectoryError("--output-dir must be different from --input-dir")
 
     if dry_run:
-        return scan_directory(input_dir)
+        return scan_directory(input_dir, name_pattern)
 
     paths = sorted(p for p in input_dir.iterdir() if p.suffix.lower() in SUPPORTED_EXTENSIONS)
     results: dict[str, Counter[str]] = {}
@@ -230,7 +251,9 @@ def redact_directory(input_dir: Path, output_dir: Path, dry_run: bool) -> dict[s
         is_pdf = path.suffix.lower() == ".pdf"
         output_path = output_dir / path.name
         results[path.name] = (
-            _redact_pdf(path, output_path) if is_pdf else _redact_docx(path, output_path)
+            _redact_pdf(path, output_path, name_pattern)
+            if is_pdf
+            else _redact_docx(path, output_path, name_pattern)
         )
 
     return results

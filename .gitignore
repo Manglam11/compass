@@ -19,5 +19,9 @@ data/golden/*
 # Resume files (never committed — labels reference them by hash only)
 resumes/
 
+# Explicit name lists for redaction (PII — never committed)
+names.txt
+*.names.txt
+
 # Generated documents
 *.pdf

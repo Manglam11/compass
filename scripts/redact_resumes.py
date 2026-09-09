@@ -2,11 +2,13 @@
 
 Writes redacted copies to --output-dir, which must differ from
 --input-dir. Defaults to --dry-run, which reports counts without writing
-anything. Name redaction is out of scope and must be done manually.
+anything. Names are not detected automatically; pass --names-file to also
+redact names from an explicit list (see compass.resume_intake.names).
 
 Run with:
   uv run python scripts/redact_resumes.py --input-dir resumes --output-dir out
   uv run python scripts/redact_resumes.py --input-dir resumes --output-dir out --no-dry-run
+  uv run python scripts/redact_resumes.py --input-dir resumes --output-dir out --names-file names.txt
 """
 
 from __future__ import annotations
@@ -15,6 +17,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from compass.resume_intake.names import NamesFileError, compile_name_pattern, load_names
 from compass.resume_intake.redact import SameDirectoryError, redact_directory
 
 
@@ -26,11 +29,20 @@ def main() -> int:
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--dry-run", dest="dry_run", action="store_true")
     parser.add_argument("--no-dry-run", dest="dry_run", action="store_false")
+    parser.add_argument("--names-file", type=Path, default=None)
     parser.set_defaults(dry_run=True)
     args = parser.parse_args()
 
+    name_pattern = None
+    if args.names_file is not None:
+        try:
+            name_pattern = compile_name_pattern(load_names(args.names_file))
+        except NamesFileError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 1
+
     try:
-        results = redact_directory(args.input_dir, args.output_dir, args.dry_run)
+        results = redact_directory(args.input_dir, args.output_dir, args.dry_run, name_pattern)
     except SameDirectoryError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1

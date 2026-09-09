@@ -2,18 +2,23 @@
 
 Unlike scan_pii.py, this IS a gate: it exits 1 if any PII is found in the
 redacted directory, or if the file count doesn't match the original
-directory (a silently skipped or dropped file is also a failure).
+directory (a silently skipped or dropped file is also a failure). Pass
+--names-file to also gate on names from an explicit list (see
+compass.resume_intake.names); without it, names are not checked.
 
 Run with:
   uv run python scripts/verify_redaction.py --original-dir resumes --redacted-dir resumes_clean
+  uv run python scripts/verify_redaction.py --original-dir resumes --redacted-dir resumes_clean --names-file names.txt
 """
 
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from pathlib import Path
 
+from compass.resume_intake.names import NamesFileError, compile_name_pattern, load_names
 from compass.resume_intake.redact import scan_directory
 from compass.resume_intake.text import SUPPORTED_EXTENSIONS
 
@@ -22,7 +27,9 @@ def _count_supported_files(directory: Path) -> int:
     return sum(1 for p in directory.iterdir() if p.suffix.lower() in SUPPORTED_EXTENSIONS)
 
 
-def verify(original_dir: Path, redacted_dir: Path) -> bool:
+def verify(
+    original_dir: Path, redacted_dir: Path, name_pattern: re.Pattern[str] | None = None
+) -> bool:
     ok = True
 
     original_count = _count_supported_files(original_dir)
@@ -35,7 +42,7 @@ def verify(original_dir: Path, redacted_dir: Path) -> bool:
         )
         ok = False
 
-    for file_name, counts in scan_directory(redacted_dir).items():
+    for file_name, counts in scan_directory(redacted_dir, name_pattern).items():
         total = sum(counts.values())
         if total:
             detail = ", ".join(f"{kind}={n}" for kind, n in sorted(counts.items()))
@@ -51,9 +58,18 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--original-dir", type=Path, required=True)
     parser.add_argument("--redacted-dir", type=Path, required=True)
+    parser.add_argument("--names-file", type=Path, default=None)
     args = parser.parse_args()
 
-    if verify(args.original_dir, args.redacted_dir):
+    name_pattern = None
+    if args.names_file is not None:
+        try:
+            name_pattern = compile_name_pattern(load_names(args.names_file))
+        except NamesFileError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 1
+
+    if verify(args.original_dir, args.redacted_dir, name_pattern):
         print("OK — no PII detected in redacted directory.")
         return 0
     return 1

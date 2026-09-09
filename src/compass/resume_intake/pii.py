@@ -3,8 +3,10 @@
 Detects emails, phone numbers (international and Indian formats), LinkedIn
 and GitHub profile URLs, other http(s) URLs, and a handful of narrower
 classes added to close specific leaks found in review: mailto: targets,
-domain-less LinkedIn/GitHub shorthand, and bare personal domains. Names are
-deliberately not detected here — that is a manual review step.
+domain-less LinkedIn/GitHub shorthand, and bare personal domains. Names
+cannot be pattern-detected reliably; `find_pii` will also match names if
+passed a compiled pattern from `compass.resume_intake.names`, built from an
+explicit, human-supplied name list.
 
 The narrower classes are kept as their own kinds (mailto, linkedin_shorthand,
 github_shorthand, domain) rather than folded into the original email/
@@ -83,6 +85,7 @@ PLACEHOLDER = {
     "linkedin_shorthand": "[LINKEDIN]",
     "github_shorthand": "[GITHUB]",
     "domain": "[URL]",
+    "name": "[NAME]",
 }
 
 _PATTERNS_IN_PRIORITY_ORDER = (
@@ -111,11 +114,20 @@ def _overlaps(span: tuple[int, int], consumed: list[tuple[int, int]]) -> bool:
     return any(start < c_end and end > c_start for c_start, c_end in consumed)
 
 
-def find_pii(text: str) -> list[PIIMatch]:
+def find_pii(text: str, name_pattern: re.Pattern[str] | None = None) -> list[PIIMatch]:
+    """Find suspected PII, plus explicit-listed names if `name_pattern` is given.
+
+    Names are checked last (lowest priority): a span already claimed by an
+    email/phone/url/etc. match cannot also be reported as a name.
+    """
     matches: list[PIIMatch] = []
     consumed: list[tuple[int, int]] = []
 
-    for kind, pattern in _PATTERNS_IN_PRIORITY_ORDER:
+    patterns = _PATTERNS_IN_PRIORITY_ORDER
+    if name_pattern is not None:
+        patterns = (*patterns, ("name", name_pattern))
+
+    for kind, pattern in patterns:
         for m in pattern.finditer(text):
             span = m.span()
             if span[0] == span[1] or _overlaps(span, consumed):
