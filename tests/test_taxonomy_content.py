@@ -12,7 +12,7 @@ REAL_ROLES_PATH = REPO_ROOT / "taxonomy" / "roles.yaml"
 
 ALLOWED_FAMILIES = {"language", "data", "ml", "deployment", "cloud", "automation", "practice"}
 
-EXPECTED_SKILL_COUNT = 61
+EXPECTED_SKILL_COUNT = 57
 EXPECTED_ROLE_COUNT = 8
 
 

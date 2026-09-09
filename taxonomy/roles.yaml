@@ -1,5 +1,5 @@
-version: 0.3.0
-taxonomy_version: 0.3.0
+version: 0.4.0
+taxonomy_version: 0.4.0
 roles:
   - id: data_analyst
     display_name: Data Analyst
@@ -11,7 +11,8 @@ roles:
   - id: data_scientist
     display_name: Data Scientist
     core: {python: 3, statistics: 3, scikit_learn: 3, model_evaluation: 2}
-    supporting: {pandas: 2, numpy: 2, sql: 2, feature_engineering: 2, data_visualisation: 1}
+    supporting:
+      {pandas: 2, numpy: 2, sql: 2, feature_engineering: 2, data_visualisation: 1, xgboost: 2}
     differentiator: {time_series: 1, nlp: 1, experiment_tracking: 1}
     min_core_ratio: 0.75
 
@@ -19,7 +20,7 @@ roles:
     display_name: ML Engineer
     core: {python: 3, pytorch: 3, model_evaluation: 3, feature_engineering: 2}
     supporting: {tensorflow: 2, scikit_learn: 2, docker: 2, mlops: 2, model_serving: 2}
-    differentiator: {kubernetes: 1, aws: 1, experiment_tracking: 1}
+    differentiator: {kubernetes: 1, aws: 1, experiment_tracking: 1, computer_vision: 1}
     min_core_ratio: 0.75
 
   - id: data_engineer
@@ -33,7 +34,7 @@ roles:
     display_name: Backend Developer
     core: {python: 3, rest_api: 3, postgresql: 2}
     supporting: {fastapi: 2, flask: 2, django: 2, docker: 2, redis: 1, mysql: 1}
-    differentiator: {javascript: 1, linux: 1, unit_testing: 1, ci_cd: 1}
+    differentiator: {javascript: 1, linux: 1, unit_testing: 1, ci_cd: 1, git: 1}
     min_core_ratio: 0.7
 
   - id: devops_mlops_engineer
@@ -50,7 +51,7 @@ roles:
         gcp: 2,
         azure: 2,
       }
-    differentiator: {python: 1, model_serving: 1, airflow: 1}
+    differentiator: {python: 1, model_serving: 1, airflow: 1, git: 2}
     min_core_ratio: 0.7
 
   - id: automation_scraping_engineer

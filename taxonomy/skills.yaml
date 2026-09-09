@@ -1,4 +1,4 @@
-version: 0.3.0
+version: 0.4.0
 skills:
   # language
   - id: python
@@ -13,22 +13,10 @@ skills:
     display_name: JavaScript
     family: language
     aliases: [javascript, js, ecmascript, es6, node.js, nodejs, node]
-  - id: typescript
-    display_name: TypeScript
-    family: language
-    aliases: [typescript, ts]
-  - id: java
-    display_name: Java
-    family: language
-    aliases: [java, core java, java se]
   - id: bash
     display_name: Bash
     family: language
     aliases: [bash, bash scripting, shell scripting, shell script, sh]
-  - id: r
-    display_name: R
-    family: language
-    aliases: [r, r language, r programming, rlang, rstats]
 
   # data
   - id: pandas
@@ -295,10 +283,6 @@ skills:
     display_name: Unit Testing
     family: practice
     aliases: [unit_testing, unit testing, unit tests, pytest, test driven development, tdd]
-  - id: code_review
-    display_name: Code Review
-    family: practice
-    aliases: [code_review, code review, code reviews, pull request review, peer review]
   - id: logging_monitoring
     display_name: Logging & Monitoring
     family: practice
