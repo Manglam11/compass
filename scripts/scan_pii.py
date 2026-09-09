@@ -32,9 +32,7 @@ from compass.resume_intake.text import extract_resume_text, iter_resume_files
 HEADER_CHARS = 200
 
 
-def scan_directory(
-    directory: Path, name_patterns: dict[str, re.Pattern[str]] | None = None
-) -> str:
+def scan_directory(directory: Path, name_patterns: dict[str, re.Pattern[str]] | None = None) -> str:
     lines: list[str] = []
 
     for path in iter_resume_files(directory):

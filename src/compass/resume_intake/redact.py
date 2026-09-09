@@ -188,7 +188,9 @@ def _redact_hyperlink_target(
         return
     new_address = address
     for match in sorted(matches, key=lambda m: -m.start):
-        new_address = new_address[: match.start] + PLACEHOLDER[match.kind] + new_address[match.end :]
+        new_address = (
+            new_address[: match.start] + PLACEHOLDER[match.kind] + new_address[match.end :]
+        )
         counts[match.kind] += 1
     rId = hyperlink._element.rId
     if rId:

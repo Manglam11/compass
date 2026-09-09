@@ -142,9 +142,7 @@ def test_resume_id_with_no_entry_is_absent_from_mapping(tmp_path: Path):
 
 def test_duplicate_resume_id_raises_error_naming_the_id(tmp_path: Path):
     names_file = tmp_path / "names.txt"
-    names_file.write_text(
-        "prac_001: Nick Miller\nprac_001: Someone Else\n", encoding="utf-8"
-    )
+    names_file.write_text("prac_001: Nick Miller\nprac_001: Someone Else\n", encoding="utf-8")
 
     with pytest.raises(NamesFileError, match="prac_001"):
         load_name_map(names_file)

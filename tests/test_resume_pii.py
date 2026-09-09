@@ -120,8 +120,7 @@ def test_linkedin_shorthand_variants_detected():
 
 def test_linkedin_shorthand_negative_common_words_files_and_versions():
     text = (
-        "Comfortable specializing in/around cloud tooling. "
-        "See report.pdf, built with python 3.11."
+        "Comfortable specializing in/around cloud tooling. See report.pdf, built with python 3.11."
     )
 
     assert find_pii(text) == []

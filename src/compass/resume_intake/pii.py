@@ -26,9 +26,7 @@ from dataclasses import dataclass
 
 EMAIL_RE = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 
-MAILTO_RE = re.compile(
-    r"mailto:[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", re.IGNORECASE
-)
+MAILTO_RE = re.compile(r"mailto:[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", re.IGNORECASE)
 
 LINKEDIN_RE = re.compile(
     r"(?:https?://)?(?:www\.)?linkedin\.com/in/[A-Za-z0-9_-]+/?", re.IGNORECASE
@@ -48,9 +46,7 @@ LINKEDIN_SHORTHAND_RE = re.compile(
 
 GITHUB_RE = re.compile(r"(?:https?://)?(?:www\.)?github\.com/[A-Za-z0-9_-]+/?", re.IGNORECASE)
 
-GITHUB_SHORTHAND_RE = re.compile(
-    r"(?:https?://)?(?:www\.)?github/[A-Za-z0-9_-]+/?", re.IGNORECASE
-)
+GITHUB_SHORTHAND_RE = re.compile(r"(?:https?://)?(?:www\.)?github/[A-Za-z0-9_-]+/?", re.IGNORECASE)
 
 URL_RE = re.compile(r"https?://[^\s)>\]]+", re.IGNORECASE)
 
@@ -62,7 +58,9 @@ URL_RE = re.compile(r"https?://[^\s)>\]]+", re.IGNORECASE)
 # "3.11" can't match.
 _DOMAIN_TLDS = ("com", "dev", "io", "tech", "me", "net", "org", "xyz", "in", "co")
 DOMAIN_RE = re.compile(
-    r"(?<![\w.@/])(?!www\.)[A-Za-z][A-Za-z0-9-]*\.(?:" + "|".join(_DOMAIN_TLDS) + r")(?![A-Za-z0-9-])",
+    r"(?<![\w.@/])(?!www\.)[A-Za-z][A-Za-z0-9-]*\.(?:"
+    + "|".join(_DOMAIN_TLDS)
+    + r")(?![A-Za-z0-9-])",
     re.IGNORECASE,
 )
 

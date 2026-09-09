@@ -295,7 +295,9 @@ def test_name_redaction_is_scoped_to_its_own_resume(tmp_path: Path):
     input_dir.mkdir()
 
     _make_docx(input_dir / "prac_001.docx", ["Nick Black", "Nick led the team."])
-    _make_docx(input_dir / "prac_002.docx", ["Experienced retailer.", "Worked on Black Friday pricing."])
+    _make_docx(
+        input_dir / "prac_002.docx", ["Experienced retailer.", "Worked on Black Friday pricing."]
+    )
 
     name_patterns = compile_name_patterns({"prac_001": "Nick Black"})
 
