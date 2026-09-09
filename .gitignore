@@ -16,5 +16,8 @@ wheels/
 data/golden/*
 !data/golden/.gitkeep
 
+# Resume files (never committed — labels reference them by hash only)
+resumes/
+
 # Generated documents
 *.pdf
