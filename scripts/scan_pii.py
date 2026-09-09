@@ -1,10 +1,11 @@
 """Report suspected PII in resumes without modifying anything.
 
 This is a report, not a gate: it always exits 0. Names are not
-auto-detected unless --names-file is passed (see
-compass.resume_intake.names) — without it, the first 200 characters of
-each document are printed under a HEADER label for manual inspection
-instead.
+auto-detected unless --names-file is passed — a `<resume_id>: <name>`
+mapping, one per resume (see compass.resume_intake.names) — without it,
+the first 200 characters of each document are printed under a HEADER
+label for manual inspection instead. Each resume's name is matched
+against that resume only.
 
 Run with:
   uv run python scripts/scan_pii.py <resumes_dir>
@@ -19,14 +20,21 @@ import sys
 from pathlib import Path
 
 from compass.extract.pdf_text import InsufficientTextError
-from compass.resume_intake.names import NamesFileError, compile_name_pattern, load_names
+from compass.resume_intake.names import (
+    NamesFileError,
+    compile_name_patterns,
+    load_name_map,
+    unknown_resume_ids,
+)
 from compass.resume_intake.pii import find_pii
 from compass.resume_intake.text import extract_resume_text, iter_resume_files
 
 HEADER_CHARS = 200
 
 
-def scan_directory(directory: Path, name_pattern: re.Pattern[str] | None = None) -> str:
+def scan_directory(
+    directory: Path, name_patterns: dict[str, re.Pattern[str]] | None = None
+) -> str:
     lines: list[str] = []
 
     for path in iter_resume_files(directory):
@@ -41,6 +49,7 @@ def scan_directory(directory: Path, name_pattern: re.Pattern[str] | None = None)
         header = text[:HEADER_CHARS].replace("\n", " ")
         lines.append(f"  HEADER — inspect manually for name: {header!r}")
 
+        name_pattern = name_patterns.get(path.stem) if name_patterns else None
         matches = find_pii(text, name_pattern)
         if not matches:
             lines.append("  no PII patterns detected")
@@ -62,15 +71,24 @@ def main() -> int:
     parser.add_argument("--names-file", type=Path, default=None)
     args = parser.parse_args()
 
-    name_pattern = None
+    name_patterns = None
     if args.names_file is not None:
         try:
-            name_pattern = compile_name_pattern(load_names(args.names_file))
+            mapping = load_name_map(args.names_file)
         except NamesFileError as exc:
             print(f"error: {exc}", file=sys.stderr)
             return 1
 
-    print(scan_directory(args.directory, name_pattern))
+        known_ids = {p.stem for p in iter_resume_files(args.directory)}
+        for resume_id in unknown_resume_ids(mapping, known_ids):
+            print(
+                f"warning: names file has resume_id {resume_id!r} with no matching file "
+                f"in {args.directory}",
+                file=sys.stderr,
+            )
+        name_patterns = compile_name_patterns(mapping)
+
+    print(scan_directory(args.directory, name_patterns))
     return 0
 
 

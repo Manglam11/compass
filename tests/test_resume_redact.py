@@ -15,8 +15,14 @@ from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
 from compass.extract.pdf_text import extract_text as extract_pdf_text
-from compass.resume_intake.names import compile_name_pattern
-from compass.resume_intake.redact import SameDirectoryError, redact_directory, scan_directory
+from compass.resume_intake.names import compile_name_patterns
+from compass.resume_intake.redact import (
+    MAX_REDACT_RECTS_PER_PAGE,
+    RedactionOvermatchError,
+    SameDirectoryError,
+    redact_directory,
+    scan_directory,
+)
 
 
 def _make_pdf(path: Path, lines: list[str]) -> None:
@@ -267,13 +273,67 @@ def test_round_trip_names_and_pii_together_leaves_zero_findings(tmp_path: Path):
         "https://example.com/portfolio",
     ]
 
-    _make_pdf(input_dir / "resume.pdf", lines)
-    _make_docx(input_dir / "resume.docx", lines)
+    _make_pdf(input_dir / "prac_001.pdf", lines)
+    _make_docx(input_dir / "prac_001.docx", lines)
 
-    name_pattern = compile_name_pattern(["Nick Miller"])
+    name_patterns = compile_name_patterns({"prac_001": "Nick Miller"})
 
-    redact_directory(input_dir, output_dir, dry_run=False, name_pattern=name_pattern)
+    redact_directory(input_dir, output_dir, dry_run=False, name_patterns=name_patterns)
 
-    rescan_results = scan_directory(output_dir, name_pattern)
-    for file_name in ("resume.pdf", "resume.docx"):
+    rescan_results = scan_directory(output_dir, name_patterns)
+    for file_name in ("prac_001.pdf", "prac_001.docx"):
         assert sum(rescan_results[file_name].values()) == 0, rescan_results[file_name]
+
+
+def test_name_redaction_is_scoped_to_its_own_resume(tmp_path: Path):
+    """THE scoping test: a global name list would match common tokens
+    ("Black") in every resume, not just the one they belong to. prac_001
+    is named "Nick Black" and should have that name redacted; prac_002
+    merely mentions "Black Friday pricing" and must be left alone."""
+    input_dir = tmp_path / "in"
+    output_dir = tmp_path / "out"
+    input_dir.mkdir()
+
+    _make_docx(input_dir / "prac_001.docx", ["Nick Black", "Nick led the team."])
+    _make_docx(input_dir / "prac_002.docx", ["Experienced retailer.", "Worked on Black Friday pricing."])
+
+    name_patterns = compile_name_patterns({"prac_001": "Nick Black"})
+
+    redact_directory(input_dir, output_dir, dry_run=False, name_patterns=name_patterns)
+
+    prac_001 = docx.Document(str(output_dir / "prac_001.docx"))
+    prac_001_text = "\n".join(p.text for p in prac_001.paragraphs)
+    assert "Nick Black" not in prac_001_text
+    assert "Nick" not in prac_001_text
+    assert "[NAME]" in prac_001_text
+
+    prac_002 = docx.Document(str(output_dir / "prac_002.docx"))
+    prac_002_text = "\n".join(p.text for p in prac_002.paragraphs)
+    assert "Black Friday pricing" in prac_002_text
+    assert "[NAME]" not in prac_002_text
+
+
+def test_page_exceeding_rect_guard_stops_and_reports(tmp_path: Path):
+    """A page that yields an implausible number of redaction rects means a
+    pattern is over-matching; redacting it silently would destroy the
+    document, so the redactor must stop instead of proceeding."""
+    input_dir = tmp_path / "in"
+    output_dir = tmp_path / "out"
+    input_dir.mkdir()
+
+    pdf_path = input_dir / "prac_001.pdf"
+    repeat_count = MAX_REDACT_RECTS_PER_PAGE + 1
+    doc = pymupdf.open()
+    # A tall custom page so every inserted line stays inside the mediabox —
+    # text extraction clips to the page rect, and a default-sized page is
+    # nowhere near tall enough for 200+ lines.
+    page = doc.new_page(width=595, height=72 + repeat_count * 10)
+    for i in range(repeat_count):
+        page.insert_text((72, 72 + i * 10), "Black")
+    doc.save(pdf_path)
+    doc.close()
+
+    name_patterns = compile_name_patterns({"prac_001": "Black"})
+
+    with pytest.raises(RedactionOvermatchError, match="prac_001"):
+        redact_directory(input_dir, output_dir, dry_run=False, name_patterns=name_patterns)

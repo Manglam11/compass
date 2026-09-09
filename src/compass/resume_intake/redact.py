@@ -14,9 +14,22 @@ run (which is not a direct child of the paragraph and so invisible to
 run(s) that make them up. A hyperlink's *target* (the relationship, e.g. a
 mailto: link or a personal-site URL) is checked and redacted independently
 of its display text, since a redacted display label can still point at a
-live leak underneath. Names are redacted too, but only when a compiled
-`name_pattern` (from `compass.resume_intake.names`) is passed in — there is
-no automatic name detection.
+live leak underneath. Names are redacted too, but only when a per-resume
+`name_patterns` mapping (from `compass.resume_intake.names`) has an entry
+for that file's resume_id (its path stem) — there is no automatic name
+detection, and a resume with no entry gets no name redaction.
+
+PDF redaction batches annotations per page: all redaction rects for a page
+are collected first, `add_redact_annot` is called for each, and
+`apply_redactions()` is called exactly once per page afterward. PyMuPDF's
+annotation-id assignment scans existing annotations on every
+`add_redact_annot` call, so redundantly searching for and re-adding rects
+for a value already handled on that page is quadratic — each unique
+matched value is therefore searched for at most once per page. A page
+that still yields an implausible number of redaction rects (default
+guard: 200) aborts instead of proceeding, since that volume means a
+pattern is over-matching and redacting it would silently destroy the
+document.
 """
 
 from __future__ import annotations
@@ -32,8 +45,14 @@ from docx.text.hyperlink import Hyperlink
 from compass.resume_intake.pii import PLACEHOLDER, find_pii
 from compass.resume_intake.text import SUPPORTED_EXTENSIONS
 
+MAX_REDACT_RECTS_PER_PAGE = 200
+
 
 class SameDirectoryError(Exception):
+    pass
+
+
+class RedactionOvermatchError(Exception):
     pass
 
 
@@ -52,18 +71,49 @@ def _scan_pdf_counts(path: Path, name_pattern: re.Pattern[str] | None) -> Counte
 def _redact_pdf(
     input_path: Path, output_path: Path, name_pattern: re.Pattern[str] | None
 ) -> Counter[str]:
+    resume_id = input_path.stem
     counts: Counter[str] = Counter()
     doc = pymupdf.open(input_path)
     try:
         for page in doc:
-            for match in find_pii(page.get_text(), name_pattern):
+            matches = find_pii(page.get_text(), name_pattern)
+            if not matches:
+                continue
+
+            # Search for each distinct matched value at most once per page —
+            # calling search_for once per match instance (rather than once
+            # per unique value) was the quadratic blow-up: a common token
+            # matched repeatedly on a page would be re-searched, and its
+            # already-found rects re-added, once for every one of its own
+            # occurrences.
+            rects_by_value: dict[str, list] = {}
+            placeholder_by_value: dict[str, str] = {}
+            total_rects = 0
+            for match in matches:
+                if match.value in rects_by_value:
+                    continue
                 rects = page.search_for(match.value)
                 if not rects:
                     continue
-                placeholder = PLACEHOLDER[match.kind]
+                rects_by_value[match.value] = rects
+                placeholder_by_value[match.value] = PLACEHOLDER[match.kind]
+                total_rects += len(rects)
+
+            if total_rects > MAX_REDACT_RECTS_PER_PAGE:
+                raise RedactionOvermatchError(
+                    f"{resume_id} page {page.number + 1}: {total_rects} redaction rects "
+                    f"exceeds guard of {MAX_REDACT_RECTS_PER_PAGE} — a pattern is over-matching"
+                )
+
+            for match in matches:
+                if match.value in rects_by_value:
+                    counts[match.kind] += 1
+
+            for value, rects in rects_by_value.items():
+                placeholder = placeholder_by_value[value]
                 for rect in rects:
                     page.add_redact_annot(rect, text=placeholder, fill=(0, 0, 0))
-                counts[match.kind] += 1
+
             page.apply_redactions()
         doc.save(output_path)
     finally:
@@ -210,19 +260,23 @@ def _redact_docx(
 
 
 def scan_directory(
-    directory: Path, name_pattern: re.Pattern[str] | None = None
+    directory: Path, name_patterns: dict[str, re.Pattern[str]] | None = None
 ) -> dict[str, Counter[str]]:
     """Report suspected-PII counts per file without modifying anything.
 
-    Uses the same detection paths (paragraphs, tables, headers/footers,
-    hyperlink targets) that redaction itself uses, so this is a faithful
-    preview of what redaction would find — and, run against an already
-    redacted directory, a faithful check of what it missed.
+    `name_patterns` maps resume_id (a file's stem, e.g. "prac_001") to a
+    pattern scoped to that resume only — a resume_id absent from the
+    mapping gets no name matching. Uses the same detection paths
+    (paragraphs, tables, headers/footers, hyperlink targets) that
+    redaction itself uses, so this is a faithful preview of what
+    redaction would find — and, run against an already redacted
+    directory, a faithful check of what it missed.
     """
     paths = sorted(p for p in directory.iterdir() if p.suffix.lower() in SUPPORTED_EXTENSIONS)
     results: dict[str, Counter[str]] = {}
     for path in paths:
         is_pdf = path.suffix.lower() == ".pdf"
+        name_pattern = name_patterns.get(path.stem) if name_patterns else None
         results[path.name] = (
             _scan_pdf_counts(path, name_pattern)
             if is_pdf
@@ -235,13 +289,13 @@ def redact_directory(
     input_dir: Path,
     output_dir: Path,
     dry_run: bool,
-    name_pattern: re.Pattern[str] | None = None,
+    name_patterns: dict[str, re.Pattern[str]] | None = None,
 ) -> dict[str, Counter[str]]:
     if input_dir.resolve() == output_dir.resolve():
         raise SameDirectoryError("--output-dir must be different from --input-dir")
 
     if dry_run:
-        return scan_directory(input_dir, name_pattern)
+        return scan_directory(input_dir, name_patterns)
 
     paths = sorted(p for p in input_dir.iterdir() if p.suffix.lower() in SUPPORTED_EXTENSIONS)
     results: dict[str, Counter[str]] = {}
@@ -250,6 +304,7 @@ def redact_directory(
     for path in paths:
         is_pdf = path.suffix.lower() == ".pdf"
         output_path = output_dir / path.name
+        name_pattern = name_patterns.get(path.stem) if name_patterns else None
         results[path.name] = (
             _redact_pdf(path, output_path, name_pattern)
             if is_pdf

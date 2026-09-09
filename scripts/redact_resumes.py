@@ -3,7 +3,9 @@
 Writes redacted copies to --output-dir, which must differ from
 --input-dir. Defaults to --dry-run, which reports counts without writing
 anything. Names are not detected automatically; pass --names-file to also
-redact names from an explicit list (see compass.resume_intake.names).
+redact names, one `<resume_id>: <name>` mapping per resume (see
+compass.resume_intake.names) — each resume's name is redacted from that
+resume only.
 
 Run with:
   uv run python scripts/redact_resumes.py --input-dir resumes --output-dir out
@@ -17,8 +19,18 @@ import argparse
 import sys
 from pathlib import Path
 
-from compass.resume_intake.names import NamesFileError, compile_name_pattern, load_names
-from compass.resume_intake.redact import SameDirectoryError, redact_directory
+from compass.resume_intake.names import (
+    NamesFileError,
+    compile_name_patterns,
+    load_name_map,
+    unknown_resume_ids,
+)
+from compass.resume_intake.redact import (
+    RedactionOvermatchError,
+    SameDirectoryError,
+    redact_directory,
+)
+from compass.resume_intake.text import SUPPORTED_EXTENSIONS
 
 
 def main() -> int:
@@ -33,17 +45,28 @@ def main() -> int:
     parser.set_defaults(dry_run=True)
     args = parser.parse_args()
 
-    name_pattern = None
+    name_patterns = None
     if args.names_file is not None:
         try:
-            name_pattern = compile_name_pattern(load_names(args.names_file))
+            mapping = load_name_map(args.names_file)
         except NamesFileError as exc:
             print(f"error: {exc}", file=sys.stderr)
             return 1
 
+        known_ids = {
+            p.stem for p in args.input_dir.iterdir() if p.suffix.lower() in SUPPORTED_EXTENSIONS
+        }
+        for resume_id in unknown_resume_ids(mapping, known_ids):
+            print(
+                f"warning: names file has resume_id {resume_id!r} with no matching file "
+                f"in {args.input_dir}",
+                file=sys.stderr,
+            )
+        name_patterns = compile_name_patterns(mapping)
+
     try:
-        results = redact_directory(args.input_dir, args.output_dir, args.dry_run, name_pattern)
-    except SameDirectoryError as exc:
+        results = redact_directory(args.input_dir, args.output_dir, args.dry_run, name_patterns)
+    except (SameDirectoryError, RedactionOvermatchError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
 

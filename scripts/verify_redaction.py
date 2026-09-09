@@ -3,8 +3,10 @@
 Unlike scan_pii.py, this IS a gate: it exits 1 if any PII is found in the
 redacted directory, or if the file count doesn't match the original
 directory (a silently skipped or dropped file is also a failure). Pass
---names-file to also gate on names from an explicit list (see
-compass.resume_intake.names); without it, names are not checked.
+--names-file to also gate on names — a `<resume_id>: <name>` mapping, one
+per resume (see compass.resume_intake.names); without it, names are not
+checked. Each resume is checked against its own name only, never anyone
+else's.
 
 Run with:
   uv run python scripts/verify_redaction.py --original-dir resumes --redacted-dir resumes_clean
@@ -18,7 +20,12 @@ import re
 import sys
 from pathlib import Path
 
-from compass.resume_intake.names import NamesFileError, compile_name_pattern, load_names
+from compass.resume_intake.names import (
+    NamesFileError,
+    compile_name_patterns,
+    load_name_map,
+    unknown_resume_ids,
+)
 from compass.resume_intake.redact import scan_directory
 from compass.resume_intake.text import SUPPORTED_EXTENSIONS
 
@@ -28,7 +35,9 @@ def _count_supported_files(directory: Path) -> int:
 
 
 def verify(
-    original_dir: Path, redacted_dir: Path, name_pattern: re.Pattern[str] | None = None
+    original_dir: Path,
+    redacted_dir: Path,
+    name_patterns: dict[str, re.Pattern[str]] | None = None,
 ) -> bool:
     ok = True
 
@@ -42,7 +51,7 @@ def verify(
         )
         ok = False
 
-    for file_name, counts in scan_directory(redacted_dir, name_pattern).items():
+    for file_name, counts in scan_directory(redacted_dir, name_patterns).items():
         total = sum(counts.values())
         if total:
             detail = ", ".join(f"{kind}={n}" for kind, n in sorted(counts.items()))
@@ -61,15 +70,26 @@ def main() -> int:
     parser.add_argument("--names-file", type=Path, default=None)
     args = parser.parse_args()
 
-    name_pattern = None
+    name_patterns = None
     if args.names_file is not None:
         try:
-            name_pattern = compile_name_pattern(load_names(args.names_file))
+            mapping = load_name_map(args.names_file)
         except NamesFileError as exc:
             print(f"error: {exc}", file=sys.stderr)
             return 1
 
-    if verify(args.original_dir, args.redacted_dir, name_pattern):
+        known_ids = {
+            p.stem for p in args.redacted_dir.iterdir() if p.suffix.lower() in SUPPORTED_EXTENSIONS
+        }
+        for resume_id in unknown_resume_ids(mapping, known_ids):
+            print(
+                f"warning: names file has resume_id {resume_id!r} with no matching file "
+                f"in {args.redacted_dir}",
+                file=sys.stderr,
+            )
+        name_patterns = compile_name_patterns(mapping)
+
+    if verify(args.original_dir, args.redacted_dir, name_patterns):
         print("OK — no PII detected in redacted directory.")
         return 0
     return 1
