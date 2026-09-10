@@ -16,7 +16,7 @@ from compass.pipeline import analyse_resume
 
 st.title("Compass")
 
-uploaded_file = st.file_uploader("Upload a resume", type=["pdf"])
+uploaded_file = st.file_uploader("Upload a resume", type=["pdf", "docx"])
 
 if uploaded_file is not None:
     tmp_path = None
