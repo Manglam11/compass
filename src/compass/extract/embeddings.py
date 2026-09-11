@@ -3,8 +3,9 @@
 Closed-vocabulary: a skill_id is only ever drawn from the taxonomy, never
 invented from resume text. Each skill's `description` is embedded once and
 cached in a single NumPy matrix; resume text is split into line-level spans
-(see spans.py), each span is embedded, and a skill is extracted if any span
-scores above the configured cosine-similarity threshold against it.
+(see spans.py), each span is embedded and votes for at most its single
+best-matching skill, and that skill is extracted only if the vote's score
+clears the configured cosine-similarity threshold.
 
 Sits behind the same interface as compass.extract.gazetteer.extract_skills
 so the two rungs are interchangeable.
@@ -79,8 +80,13 @@ def extract_skills(text: str, taxonomy: Taxonomy) -> list[str]:
     span_matrix = _encode_normalized(model, spans, dim_hint=skill_matrix.shape[1])
 
     similarities = span_matrix @ skill_matrix.T  # (num_spans, num_skills)
-    best_per_skill = similarities.max(axis=0)
+    best_skill_per_span = similarities.argmax(axis=1)
+    best_score_per_span = similarities.max(axis=1)
 
     threshold = _threshold()
-    found = {skill_ids[i] for i, score in enumerate(best_per_skill) if score > threshold}
+    found = {
+        skill_ids[best_skill_per_span[i]]
+        for i, score in enumerate(best_score_per_span)
+        if score > threshold
+    }
     return sorted(found)

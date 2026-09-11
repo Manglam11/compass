@@ -4,5 +4,7 @@ environment: development
 log_level: INFO
 
 extract:
-  # Placeholder — S8.3 freezes the real value.
-  embedding_threshold: 0.55
+  # Frozen 11 Sep 2026 by threshold sweep on a single burned resume.
+  # Sweep was flat across 0.40-0.50 (21 skills at each) - the argmax step
+  # does the filtering, not this value. Do not tune further.
+  embedding_threshold: 0.50

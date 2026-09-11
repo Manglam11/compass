@@ -114,5 +114,23 @@ def test_threshold_is_read_from_config_not_hardcoded(monkeypatch):
     assert "python" not in embeddings.extract_skills(text, TAXONOMY)
 
 
+def test_span_votes_for_at_most_one_skill(monkeypatch):
+    """A span aligned with several skill descriptions must extract only one."""
+    python_description = TAXONOMY.skills["python"].description
+    sql_description = TAXONOMY.skills["sql"].description
+    span_text = "A resume line engineered to align with several skill descriptions."
+
+    monkeypatch.setattr(
+        embeddings,
+        "_get_model",
+        lambda: FakeModel(aligned=(python_description, sql_description, span_text)),
+    )
+
+    text = f"Irrelevant short-dropped filler.\n{span_text}"
+    result = embeddings.extract_skills(text, TAXONOMY)
+
+    assert len(result) <= 1
+
+
 def test_no_spans_returns_no_skills():
     assert embeddings.extract_skills("short\ntiny", TAXONOMY) == []
