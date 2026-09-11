@@ -22,6 +22,11 @@ class Skill(BaseModel):
     display_name: str
     family: str = Field(pattern=ID_PATTERN)
     aliases: list[str] = Field(min_length=1)
+    # Presence and length are enforced in loader._validate() as a collected
+    # error rather than here, so a missing description is reported alongside
+    # the other taxonomy violations instead of raising a fail-fast
+    # ValidationError before cross-validation even runs.
+    description: str | None = None
 
 
 class SkillsFile(BaseModel):

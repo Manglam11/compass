@@ -1,60 +1,73 @@
-version: 0.5.1
+version: 0.6.0
 skills:
   # language
   - id: python
     display_name: Python
     family: language
     aliases: [python, python3, py]
+    description: Writing application code, automation scripts, and data pipelines in a widely used general-purpose language.
   - id: sql
     display_name: SQL
     family: language
     aliases: [sql, structured query language, t-sql, tsql, pl/sql, plsql]
+    description: Writing queries to retrieve, join, and aggregate data stored in relational databases.
   - id: javascript
     display_name: JavaScript
     family: language
     aliases: [javascript, js, ecmascript, es6, node.js, nodejs, node]
+    description: Building interactive web front ends and server-side services with a dynamic scripting language and its runtime.
   - id: bash
     display_name: Bash
     family: language
     aliases: [bash, bash scripting, shell scripting, shell script, sh]
+    description: Automating command-line tasks and system operations by writing shell scripts.
 
   # data
   - id: pandas
     display_name: Pandas
     family: data
     aliases: [pandas, pandas library, dataframes, dataframe]
+    description: Cleaning, reshaping, and analyzing tabular data using dataframes in a Python data analysis library.
   - id: numpy
     display_name: NumPy
     family: data
     aliases: [numpy, np, numerical python]
+    description: Performing fast numerical computations and array operations for scientific and data workloads.
   - id: postgresql
     display_name: PostgreSQL
     family: data
     aliases: [postgresql, postgres, psql, postgre sql]
+    description: Modeling data and writing advanced SQL queries against a robust, feature-rich relational database system.
   - id: mysql
     display_name: MySQL
     family: data
     aliases: [mysql, my sql]
+    description: Storing and querying relational data using a fast, widely deployed relational database system.
   - id: mongodb
     display_name: MongoDB
     family: data
     aliases: [mongodb, mongo, mongo db]
+    description: Storing and querying flexible, schema-less documents in a NoSQL document database.
   - id: redis
     display_name: Redis
     family: data
     aliases: [redis, redis cache]
+    description: Caching frequently accessed data and managing fast key-value lookups with an in-memory data store.
   - id: spark
     display_name: Apache Spark
     family: data
     aliases: [spark, apache spark, pyspark, spark sql]
+    description: Processing and analyzing large-scale datasets in parallel across a distributed compute cluster.
   - id: airflow
     display_name: Apache Airflow
     family: data
     aliases: [airflow, apache airflow, airflow dag, dags]
+    description: Orchestrating and scheduling multi-step data workflows as directed acyclic graphs of tasks.
   - id: dbt
     display_name: dbt
     family: data
     aliases: [dbt, data build tool, dbt core]
+    description: Transforming raw warehouse tables into clean, tested analytics models using SQL-based transformation workflows.
   - id: data_modelling
     display_name: Data Modelling
     family: data
@@ -68,6 +81,7 @@ skills:
         schema design,
         star schema,
       ]
+    description: Designing table structures and dimensional schemas to organize data for efficient storage and analysis.
   - id: etl
     display_name: ETL
     family: data
@@ -83,6 +97,7 @@ skills:
         ingestion pipeline,
         migration script,
       ]
+    description: Building pipelines that pull data from source systems, transform it, and load it into target destinations.
   - id: data_visualisation
     display_name: Data Visualisation
     family: data
@@ -96,18 +111,22 @@ skills:
         seaborn,
         plotly,
       ]
+    description: Creating charts and plots in code to explore and communicate patterns found in data.
   - id: excel
     display_name: Excel
     family: data
     aliases: [excel, microsoft excel, spreadsheets, vlookup, pivot tables]
+    description: Analyzing data and building reports using formulas, lookup functions, and pivot tables in spreadsheet software.
   - id: tableau
     display_name: Tableau
     family: data
     aliases: [tableau, tableau desktop, tableau server]
+    description: Building interactive drag-and-drop dashboards and visual reports to share data insights with stakeholders.
   - id: power_bi
     display_name: Power BI
     family: data
     aliases: [power_bi, power bi, powerbi, ms power bi]
+    description: Connecting to business data sources to build interactive reports and dashboards for stakeholder consumption.
   - id: vector_db
     display_name: Vector Database
     family: data
@@ -124,53 +143,65 @@ skills:
         vector database,
         embedding store,
       ]
+    description: Storing and searching numeric embeddings to power similarity-based retrieval in AI applications.
 
   # ml
   - id: scikit_learn
     display_name: scikit-learn
     family: ml
     aliases: [scikit_learn, scikit-learn, sklearn, scikit learn]
+    description: Building and evaluating classical machine learning models such as classifiers and regressors in Python.
   - id: tensorflow
     display_name: TensorFlow
     family: ml
     aliases: [tensorflow, tensor flow]
+    description: Designing, training, and deploying deep learning models at scale using a production-oriented neural network framework.
   - id: pytorch
     display_name: PyTorch
     family: ml
     aliases: [pytorch, py torch, torch]
+    description: Building and training neural networks with a flexible deep learning framework favored for research and experimentation.
   - id: xgboost
     display_name: XGBoost
     family: ml
     aliases: [xgboost, xg boost, gradient boosting, gradient boosted trees, gbm]
+    description: Training high-performance predictive models using ensembles of gradient-boosted decision trees.
   - id: feature_engineering
     display_name: Feature Engineering
     family: ml
     aliases: [feature_engineering, feature engineering, feature selection, feature extraction]
+    description: Creating, selecting, and transforming input variables to improve machine learning model performance.
   - id: model_evaluation
     display_name: Model Evaluation
     family: ml
     aliases:
       [model_evaluation, model evaluation, model validation, cross validation, cross-validation]
+    description: Assessing how well a model generalizes using validation techniques such as cross-validation.
   - id: nlp
     display_name: Natural Language Processing
     family: ml
     aliases: [nlp, natural language processing, spacy, nltk, text mining]
+    description: Extracting structure and meaning from unstructured text using language processing techniques.
   - id: computer_vision
     display_name: Computer Vision
     family: ml
     aliases: [computer_vision, computer vision, cv, opencv, image processing]
+    description: Analyzing images or video to detect, classify, or extract visual information programmatically.
   - id: time_series
     display_name: Time Series
     family: ml
     aliases: [time_series, time series, time series analysis, forecasting, time series forecasting]
+    description: Analyzing sequential, time-stamped data to identify trends and forecast future values.
   - id: statistics
     display_name: Statistics
     family: ml
     aliases: [statistics, statistical analysis, stats, hypothesis testing, probability]
+    description: Applying statistical reasoning and hypothesis testing to draw defensible conclusions from data.
   - id: experiment_tracking
     display_name: Experiment Tracking
     family: ml
     aliases: [experiment_tracking, experiment tracking, mlflow, weights and biases, wandb]
+    description: Logging model runs, metrics, and parameters to compare and reproduce machine learning experiments.
   - id: llm_integration
     display_name: LLM Integration
     family: ml
@@ -183,6 +214,7 @@ skills:
         gemini api,
         llamaindex,
       ]
+    description: Connecting applications to large language model APIs to generate text or power AI features.
   - id: rag
     display_name: Retrieval-Augmented Generation
     family: ml
@@ -193,6 +225,7 @@ skills:
         retrieval-augmented generation,
         vector search,
       ]
+    description: Grounding language model responses in retrieved documents to improve factual accuracy.
   - id: prompt_engineering
     display_name: Prompt Engineering
     family: ml
@@ -207,6 +240,7 @@ skills:
         system prompt,
         few-shot,
       ]
+    description: Crafting and refining prompts and examples to steer language model outputs toward a desired result.
 
   # genai
   - id: agent_frameworks
@@ -223,28 +257,34 @@ skills:
         agentic workflow,
         tool calling,
       ]
+    description: Building multi-step AI agents that plan, call tools, and chain reasoning using an orchestration framework.
 
   # deployment
   - id: docker
     display_name: Docker
     family: deployment
     aliases: [docker, dockerfile, dockerised, dockerized, containerize, containerization]
+    description: Building and running containers to package and ship applications.
   - id: kubernetes
     display_name: Kubernetes
     family: deployment
     aliases: [kubernetes, k8s, kube, container orchestration]
+    description: Deploying, scaling, and managing containerized applications across a cluster using an orchestration platform.
   - id: fastapi
     display_name: FastAPI
     family: deployment
     aliases: [fastapi, fast api]
+    description: Building fast, type-safe web APIs in Python using an async-first web framework.
   - id: flask
     display_name: Flask
     family: deployment
     aliases: [flask, flask api]
+    description: Building lightweight web applications and APIs in Python using a minimal, unopinionated web framework.
   - id: django
     display_name: Django
     family: deployment
     aliases: [django, django rest framework, drf]
+    description: Building full-featured web applications and REST APIs using a batteries-included Python web framework.
   - id: rest_api
     display_name: REST API
     family: deployment
@@ -262,72 +302,88 @@ skills:
         endpoints,
         rest endpoint,
       ]
+    description: Designing and exposing web endpoints that let other systems read and write data over HTTP.
   - id: streamlit
     display_name: Streamlit
     family: deployment
     aliases: [streamlit, streamlit app, streamlit dashboard]
+    description: Building interactive data apps and dashboards quickly using a Python UI framework.
   - id: model_serving
     display_name: Model Serving
     family: deployment
     aliases: [model_serving, model serving, model deployment, inference api, serving models]
+    description: Exposing trained machine learning models as APIs so applications can request predictions.
   - id: mlops
     display_name: MLOps
     family: deployment
     aliases: [mlops, ml ops, ml operations, machine learning operations]
+    description: Automating and operating the machine learning lifecycle, from training pipelines to production monitoring.
 
   # cloud
   - id: aws
     display_name: AWS
     family: cloud
     aliases: [aws, amazon web services, ec2, s3, lambda, sagemaker]
+    description: Provisioning compute, storage, and managed services on a major public cloud platform.
   - id: gcp
     display_name: Google Cloud Platform
     family: cloud
     aliases: [gcp, google cloud, google cloud platform, bigquery, vertex ai]
+    description: Running data warehousing, machine learning, and infrastructure workloads on Google's cloud platform.
   - id: azure
     display_name: Microsoft Azure
     family: cloud
     aliases: [azure, microsoft azure, azure ml, azure functions]
+    description: Deploying applications, functions, and machine learning workloads on Microsoft's cloud platform.
   - id: terraform
     display_name: Terraform
     family: cloud
     aliases: [terraform, infrastructure as code, iac, terraform hcl]
+    description: Defining and provisioning cloud infrastructure declaratively as version-controlled code.
   - id: linux
     display_name: Linux
     family: cloud
     aliases: [linux, unix, linux administration, command line, cli, shell, ubuntu]
+    description: Administering servers and working from the command line in a Unix-like operating system.
 
   # automation
   - id: selenium
     display_name: Selenium
     family: automation
     aliases: [selenium, selenium webdriver, selenium automation]
+    description: Automating browser interactions to test or drive existing web applications programmatically.
   - id: web_scraping
     display_name: Web Scraping
     family: automation
     aliases: [web_scraping, web scraping, scraping, scrapy, crawler]
+    description: Extracting structured data from websites by crawling and parsing pages at scale.
   - id: beautifulsoup
     display_name: Beautiful Soup
     family: automation
     aliases: [beautifulsoup, beautiful soup, bs4]
+    description: Parsing HTML and XML documents to pull out specific fields using a lightweight Python parsing library.
   - id: playwright
     display_name: Playwright
     family: automation
     aliases: [playwright, playwright automation]
+    description: Automating and testing web applications across multiple browsers with a modern, auto-waiting automation tool.
   - id: cron
     display_name: Cron
     family: automation
     aliases: [cron, cron job, cron jobs, crontab, scheduled tasks]
+    description: Scheduling scripts and jobs to run automatically at fixed times or recurring intervals.
   - id: api_integration
     display_name: API Integration
     family: automation
     aliases: [api_integration, api integration, third party api, third-party api, api consumption]
+    description: Connecting applications to outside services by consuming and integrating their APIs.
 
   # practice
   - id: git
     display_name: Git
     family: practice
     aliases: [git, github, gitlab, version control, git version control]
+    description: Tracking code changes and collaborating with others using a distributed version control system.
   - id: ci_cd
     display_name: CI/CD
     family: practice
@@ -343,11 +399,14 @@ skills:
         gitlab ci,
         azure devops,
       ]
+    description: Automating build, test, and deployment pipelines to ship code changes continuously and reliably.
   - id: unit_testing
     display_name: Unit Testing
     family: practice
     aliases: [unit_testing, unit testing, unit tests, pytest, test driven development, tdd]
+    description: Writing automated tests that verify individual units of code behave correctly.
   - id: logging_monitoring
     display_name: Logging & Monitoring
     family: practice
     aliases: [logging_monitoring, logging, monitoring, observability, alerting]
+    description: Instrumenting applications with logs, metrics, and alerts to track health and diagnose production issues.

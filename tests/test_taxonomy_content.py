@@ -32,6 +32,12 @@ def test_real_skills_yaml_has_expected_skill_count():
     assert len(taxonomy.skills) == EXPECTED_SKILL_COUNT
 
 
+def test_every_skill_has_a_description():
+    taxonomy = load_taxonomy(REAL_SKILLS_PATH, REAL_ROLES_PATH)
+    for skill in taxonomy.skills.values():
+        assert skill.description, f"skill '{skill.id}' has no description"
+
+
 def test_every_family_is_in_allowed_set():
     taxonomy = load_taxonomy(REAL_SKILLS_PATH, REAL_ROLES_PATH)
     for skill in taxonomy.skills.values():

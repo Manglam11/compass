@@ -26,10 +26,12 @@ skills:
     display_name: Docker
     family: deployment
     aliases: [docker, dockerfile, dockerised, dockerized]
+    description: Building and running containers to package and ship applications.
   - id: python
     display_name: Python
     family: language
     aliases: [python, python3, py]
+    description: Writing application code, automation scripts, and data pipelines.
 """
 
 VALID_ROLES_YAML = """
@@ -59,7 +61,7 @@ def write_pair(tmp_path: Path, skills_yaml: str, roles_yaml: str) -> tuple[Path,
 
 def test_real_taxonomy_files_load_successfully():
     taxonomy = load_taxonomy(REAL_SKILLS_PATH, REAL_ROLES_PATH)
-    assert taxonomy.taxonomy_version == "0.5.1"
+    assert taxonomy.taxonomy_version == "0.6.0"
     assert {"docker", "python"} <= set(taxonomy.skills)
     assert "ml_engineer" in taxonomy.roles
 
@@ -206,6 +208,29 @@ roles:
 """
     skills_path, roles_path = write_pair(tmp_path, skills_yaml, roles_yaml)
     with pytest.raises(TaxonomyError, match="missing its own id"):
+        load_taxonomy(skills_path, roles_path)
+
+
+def test_missing_description_rejected(tmp_path: Path):
+    skills_yaml = """
+version: 0.1.0
+skills:
+  - id: docker
+    display_name: Docker
+    family: deployment
+    aliases: [docker, dockerfile, dockerised, dockerized]
+"""
+    roles_yaml = """
+version: 0.1.0
+taxonomy_version: 0.1.0
+roles:
+  - id: role_a
+    display_name: Role A
+    core: {docker: 3}
+    min_core_ratio: 0.7
+"""
+    skills_path, roles_path = write_pair(tmp_path, skills_yaml, roles_yaml)
+    with pytest.raises(TaxonomyError, match="skill 'docker' is missing a description"):
         load_taxonomy(skills_path, roles_path)
 
 

@@ -61,6 +61,15 @@ def _validate(skills_file: SkillsFile, roles_file: RolesFile) -> list[str]:
         if skill.id not in skill.aliases:
             errors.append(f"skill '{skill.id}' is missing its own id from its aliases list")
 
+    for skill in skills_file.skills:
+        if skill.description is None:
+            errors.append(f"skill '{skill.id}' is missing a description")
+        elif not (20 <= len(skill.description) <= 200):
+            errors.append(
+                f"skill '{skill.id}' has description of length {len(skill.description)}, "
+                "must be between 20 and 200 characters"
+            )
+
     known_skill_ids = set(skill_ids)
     for role in roles_file.roles:
         for bucket in WEIGHT_BUCKETS:

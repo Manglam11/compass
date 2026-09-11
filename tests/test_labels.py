@@ -20,10 +20,12 @@ skills:
     display_name: Python
     family: language
     aliases: [python, python3, py]
+    description: Writing application code, automation scripts, and data pipelines.
   - id: docker
     display_name: Docker
     family: deployment
     aliases: [docker, dockerfile]
+    description: Building and running containers to package and ship applications.
 """
 
 TAXONOMY_ROLES_YAML = """
