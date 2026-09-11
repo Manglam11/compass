@@ -2,3 +2,7 @@
 # secrets are read from environment variables only (see .env.example).
 environment: development
 log_level: INFO
+
+extract:
+  # Placeholder — S8.3 freezes the real value.
+  embedding_threshold: 0.55
