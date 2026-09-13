@@ -18,7 +18,10 @@ from __future__ import annotations
 import argparse
 import re
 import sys
+import zipfile
 from pathlib import Path
+
+import pymupdf
 
 from compass.resume_intake.names import (
     NamesFileError,
@@ -27,11 +30,42 @@ from compass.resume_intake.names import (
     unknown_resume_ids,
 )
 from compass.resume_intake.redact import scan_directory
-from compass.resume_intake.text import SUPPORTED_EXTENSIONS
+from compass.resume_intake.text import SUPPORTED_EXTENSIONS, iter_resume_files
 
 
 def _count_supported_files(directory: Path) -> int:
     return sum(1 for p in directory.iterdir() if p.suffix.lower() in SUPPORTED_EXTENSIONS)
+
+
+def check_images(redacted_dir: Path) -> bool:
+    """Report per-file image counts and fail on any surviving PDF image.
+
+    DOCX image stripping is not implemented (S9.4): a DOCX with images is
+    reported as a warning and does not fail the run. A PDF with any image
+    fails the run. Only filenames and counts are printed — never text.
+    """
+    ok = True
+
+    for path in iter_resume_files(redacted_dir):
+        if path.suffix.lower() == ".pdf":
+            with pymupdf.open(path) as doc:
+                count = sum(len(page.get_images(full=True)) for page in doc)
+            if count > 0:
+                print(f"error: {path.name}: {count} image(s) still present in PDF", file=sys.stderr)
+                ok = False
+        else:
+            with zipfile.ZipFile(path) as archive:
+                count = sum(
+                    1 for info in archive.infolist() if info.filename.startswith("word/media/")
+                )
+            if count > 0:
+                print(
+                    f"warning: {path.name}: {count} image(s) in docx media - "
+                    "docx image stripping not implemented (S9.4)",
+                    file=sys.stderr,
+                )
+
+    return ok
 
 
 def verify(
@@ -57,6 +91,9 @@ def verify(
             detail = ", ".join(f"{kind}={n}" for kind, n in sorted(counts.items()))
             print(f"error: {file_name}: PII still present ({detail})", file=sys.stderr)
             ok = False
+
+    if not check_images(redacted_dir):
+        ok = False
 
     return ok
 
