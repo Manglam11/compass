@@ -38,11 +38,10 @@ def _count_supported_files(directory: Path) -> int:
 
 
 def check_images(redacted_dir: Path) -> bool:
-    """Report per-file image counts and fail on any surviving PDF image.
+    """Report per-file image counts and fail on any surviving image.
 
-    DOCX image stripping is not implemented (S9.4): a DOCX with images is
-    reported as a warning and does not fail the run. A PDF with any image
-    fails the run. Only filenames and counts are printed — never text.
+    A PDF or DOCX with any image fails the run. Only filenames and counts
+    are printed — never text.
     """
     ok = True
 
@@ -60,10 +59,10 @@ def check_images(redacted_dir: Path) -> bool:
                 )
             if count > 0:
                 print(
-                    f"warning: {path.name}: {count} image(s) in docx media - "
-                    "docx image stripping not implemented (S9.4)",
+                    f"error: {path.name}: {count} image(s) still present in docx media",
                     file=sys.stderr,
                 )
+                ok = False
 
     return ok
 

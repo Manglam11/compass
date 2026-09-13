@@ -1,4 +1,4 @@
-"""Strip every image from resume PDFs. Never touches the text layer.
+"""Strip every image from resume PDFs and DOCX files. Never touches the text layer.
 
 The audit (scripts/audit_images.py) found the text-layer PII pipeline is
 blind to images: headshots, scanned certificates, and off-page decorative
@@ -8,7 +8,15 @@ page.apply_redactions() with images=PDF_REDACT_IMAGE_REMOVE and
 text=PDF_REDACT_TEXT_NONE, so the extracted text is left byte-for-byte
 identical.
 
-DOCX files are copied through unchanged; stripping their images is S9.4.
+DOCX images are removed by rewriting the zip archive without any
+word/media/ entry, and without the corresponding <Relationship> entries in
+the *.rels parts (any relationship whose Target starts with "media/") so
+the package has no dangling relationship pointing at a removed part. The
+inline references to those relationship ids that remain in document.xml
+(or headers/footers/numbering.xml) are left as-is — python-docx's text
+extraction never dereferences them, so the file still opens and its text
+is unaffected; this is exercised directly by the round-trip-open test in
+tests/test_strip_images.py.
 
 A file that has zero text characters after stripping, but had at least one
 image in the input, is flagged blank_after_strip — it must not be silently
@@ -21,13 +29,17 @@ Run with:
 from __future__ import annotations
 
 import argparse
-import shutil
 import sys
+import xml.etree.ElementTree as ET
+import zipfile
 from pathlib import Path
 
 import pymupdf
 
-from compass.resume_intake.text import iter_resume_files
+from compass.resume_intake.text import extract_resume_text, iter_resume_files
+
+_RELS_NS = "http://schemas.openxmlformats.org/package/2006/relationships"
+ET.register_namespace("", _RELS_NS)
 
 
 def strip_pdf_images(in_path: Path, out_path: Path) -> tuple[int, int, int]:
@@ -49,6 +61,38 @@ def strip_pdf_images(in_path: Path, out_path: Path) -> tuple[int, int, int]:
     return images_before, images_after, text_chars
 
 
+def _strip_media_relationships(data: bytes) -> bytes:
+    root = ET.fromstring(data)
+    for rel in list(root):
+        if rel.get("Target", "").startswith("media/"):
+            root.remove(rel)
+    return ET.tostring(root, xml_declaration=True, encoding="UTF-8")
+
+
+def strip_docx_images(in_path: Path, out_path: Path) -> tuple[int, int, int]:
+    """Return (media_before, media_after, text_chars_after)."""
+    with zipfile.ZipFile(in_path) as archive:
+        infos = archive.infolist()
+        data_by_name = {info.filename: archive.read(info.filename) for info in infos}
+
+    media_before = sum(1 for info in infos if info.filename.startswith("word/media/"))
+
+    with zipfile.ZipFile(out_path, "w", zipfile.ZIP_DEFLATED) as archive:
+        for info in infos:
+            if info.filename.startswith("word/media/"):
+                continue
+            data = data_by_name[info.filename]
+            if info.filename.endswith(".rels"):
+                data = _strip_media_relationships(data)
+            archive.writestr(info, data)
+
+    with zipfile.ZipFile(out_path) as archive:
+        media_after = sum(1 for name in archive.namelist() if name.startswith("word/media/"))
+    text_chars = len(extract_resume_text(out_path))
+
+    return media_before, media_after, text_chars
+
+
 def strip_directory(in_dir: Path, out_dir: Path) -> int:
     files_processed = 0
     total_removed = 0
@@ -61,12 +105,10 @@ def strip_directory(in_dir: Path, out_dir: Path) -> int:
         out_path = out_dir / path.name
 
         if path.suffix.lower() == ".docx":
-            shutil.copy2(path, out_path)
-            print(f"{path.name}: copied untouched (docx, image stripping is S9.4)")
-            files_processed += 1
-            continue
+            images_before, images_after, text_chars = strip_docx_images(path, out_path)
+        else:
+            images_before, images_after, text_chars = strip_pdf_images(path, out_path)
 
-        images_before, images_after, text_chars = strip_pdf_images(path, out_path)
         removed = images_before - images_after
         total_removed += removed
         print(f"{path.name}: removed={removed} remaining={images_after} text_chars={text_chars}")

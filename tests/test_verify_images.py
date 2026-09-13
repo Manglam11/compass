@@ -67,16 +67,16 @@ def test_pdf_with_image_fails_and_names_file(tmp_path: Path, capsys: pytest.Capt
     assert "1 image" in captured.err
 
 
-def test_docx_with_images_warns_but_passes(tmp_path: Path, capsys: pytest.CaptureFixture[str]):
+def test_docx_with_images_fails(tmp_path: Path, capsys: pytest.CaptureFixture[str]):
     _make_pdf(tmp_path / "clean.pdf", with_image=False)
     _make_docx_with_media(tmp_path / "prac.docx", 3)
 
     ok = check_images(tmp_path)
     captured = capsys.readouterr()
 
-    assert ok
+    assert not ok
     assert "prac.docx" in captured.err
-    assert "docx image stripping not implemented (S9.4)" in captured.err
+    assert "3 image" in captured.err
 
 
 def test_verify_reports_text_pii_and_pdf_image_together(
