@@ -20,6 +20,7 @@ data/golden/*
 resumes/*
 !resumes/PROVENANCE.csv
 resumes_clean/
+resumes_stripped/
 
 # Explicit name lists for redaction (PII — never committed)
 names.txt
@@ -27,3 +28,4 @@ names.txt
 
 # Generated documents
 *.pdf
+*.docx
