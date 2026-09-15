@@ -15,8 +15,7 @@ import sys
 from pathlib import Path
 
 from compass.eval.agreement import AggregateAgreement, PerResumeAgreement, compute_agreement
-from compass.extract import embeddings, gazetteer
-from compass.resume_intake.text import extract_resume_text
+from compass.eval.extraction import load_resume_extractions
 from compass.taxonomy.loader import load_taxonomy
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -181,10 +180,7 @@ def main() -> int:
     taxonomy = load_taxonomy(TAXONOMY_DIR / "skills.yaml", TAXONOMY_DIR / "roles.yaml")
     resume_paths = build_resume_paths(args.own_resume)
 
-    texts: dict[str, str] = {key: extract_resume_text(path) for key, path in resume_paths.items()}
-    rung1_skills = {
-        key: set(gazetteer.extract_skills(text, taxonomy)) for key, text in texts.items()
-    }
+    rung1_skills, rung2_skills, _texts = load_resume_extractions(taxonomy, resume_paths)
 
     rung1_per_resume, rung1_aggregate = compute_agreement(rung1_skills, OPUS_REFERENCE)
 
@@ -194,9 +190,6 @@ def main() -> int:
     print("rung 1 (gazetteer) vs reference:")
     print_table(rung1_per_resume, rung1_aggregate)
 
-    rung2_skills = {
-        key: set(embeddings.extract_skills(text, taxonomy)) for key, text in texts.items()
-    }
     rung2_per_resume, rung2_aggregate = compute_agreement(rung2_skills, OPUS_REFERENCE)
     print()
     print("rung 2 (embeddings) vs reference:")
