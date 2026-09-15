@@ -188,6 +188,28 @@ Other top-level directories not listed above: `app/` (Streamlit UI),
 examples), `data/golden/` and `eval/` (placeholders), `labels/practice/`
 and `labels/exam/` (hand-label files, draft/final status per file).
 
+## Local model server
+
+Rung 3 (local open-weight LLM) will run through Ollama served in Docker,
+bound to `127.0.0.1` only so it is never reachable from the network.
+`docker-compose.yml` at the repo root defines the `ollama` service (GPU
+passthrough, `ollama_models` named volume, healthcheck via `ollama list`).
+No model is pulled yet — this only sets up the server.
+
+```bash
+# Start the server (detached)
+docker compose up -d
+
+# Stop the server (containers removed, ollama_models volume kept)
+docker compose down
+
+# Check status (look for "healthy")
+docker compose ps
+
+# View logs (look for the CUDA / GPU detection line)
+docker compose logs ollama
+```
+
 ## Roadmap / what's next
 
 - **Rung 3** (local open-weight LLM): not started. Needs a licence check
