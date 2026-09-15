@@ -13,6 +13,7 @@ dependencies = [
     "pymupdf>=1.28.2",
     "python-docx>=1.2.0",
     "pyyaml>=6.0.3",
+    "ragas>=0.4.3",
     "sentence-transformers>=6.0.1",
     "spacy>=3.8.16",
     "streamlit>=1.63.0",
