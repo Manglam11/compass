@@ -113,6 +113,32 @@ def test_empty_model_response_is_not_swallowed_into_empty_list(monkeypatch):
         ollama_llm.extract_skills("some resume text", TAXONOMY)
 
 
+def test_model_override_takes_precedence_over_config(monkeypatch):
+    monkeypatch.setattr(
+        ollama_llm,
+        "load_default_yaml",
+        lambda: {"extract": {"rung3": {"model": "qwen3:8b"}}},
+    )
+    client = _install_fake_client(
+        monkeypatch, FakeClient(content=json.dumps({"skills_present": []}))
+    )
+
+    ollama_llm.extract_skills("some resume text", TAXONOMY, model="phi4-mini")
+
+    assert len(client.calls) == 1
+    assert client.calls[0]["model"] == "phi4-mini"
+    assert ollama_llm.resolved_model("phi4-mini") == "phi4-mini"
+
+
+def test_resolved_model_falls_back_to_config(monkeypatch):
+    monkeypatch.setattr(
+        ollama_llm,
+        "load_default_yaml",
+        lambda: {"extract": {"rung3": {"model": "gemma4:e4b"}}},
+    )
+    assert ollama_llm.resolved_model(None) == "gemma4:e4b"
+
+
 def test_config_values_are_passed_to_client(monkeypatch):
     monkeypatch.setattr(
         ollama_llm,

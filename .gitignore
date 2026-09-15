@@ -30,3 +30,6 @@ names.txt
 *.pdf
 *.docx
 resumes_stripped_v2/
+
+# Rung 3 eval harness output (resume ids/skill ids/timings only, but never committed)
+results/

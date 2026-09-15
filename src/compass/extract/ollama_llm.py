@@ -36,7 +36,7 @@ class Rung3ExtractionError(Exception):
     """Raised when the Ollama rung fails to produce a valid closed-vocabulary result."""
 
 
-def _rung3_config() -> dict[str, Any]:
+def rung3_config() -> dict[str, Any]:
     config = load_default_yaml()
     return {**DEFAULTS, **config.get("extract", {}).get("rung3", {})}
 
@@ -75,8 +75,14 @@ def _build_schema(skill_ids: list[str]) -> dict[str, Any]:
     }
 
 
-def extract_skills(text: str, taxonomy: Taxonomy) -> list[str]:
-    config = _rung3_config()
+def resolved_model(model: str | None = None) -> str:
+    """The model name that a call to extract_skills will actually use."""
+    return model if model is not None else rung3_config()["model"]
+
+
+def extract_skills(text: str, taxonomy: Taxonomy, *, model: str | None = None) -> list[str]:
+    config = rung3_config()
+    effective_model = model if model is not None else config["model"]
     skill_ids = sorted(taxonomy.skills)
 
     prompt = _build_prompt(skill_ids, text, config["prompt_version"])
@@ -85,7 +91,7 @@ def extract_skills(text: str, taxonomy: Taxonomy) -> list[str]:
 
     try:
         response = client.chat(
-            model=config["model"],
+            model=effective_model,
             messages=[{"role": "user", "content": prompt}],
             format=schema,
             options={
@@ -97,7 +103,7 @@ def extract_skills(text: str, taxonomy: Taxonomy) -> list[str]:
         )
     except Exception as exc:
         raise Rung3ExtractionError(
-            f"Ollama request to model {config['model']!r} at {config['host']} failed "
+            f"Ollama request to model {effective_model!r} at {config['host']} failed "
             f"(server not running, or timed out after {config['timeout_seconds']}s): {exc}"
         ) from exc
 
