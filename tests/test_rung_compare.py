@@ -79,7 +79,7 @@ def test_default_flow_runs_rung1_and_rung2_only_never_touching_rung3(monkeypatch
 def test_results_payload_has_required_keys_and_no_resume_text():
     rung3_result = Rung3Results(
         skills_by_resume={"prac_001": {"python", "sql"}},
-        seconds_by_resume={"prac_001": 1.5},
+        seconds_by_resume={"prac_001": 1.5, "prac_006": 300.0},
         failures={"prac_006": "Ollama returned an empty response"},
         warmup_seconds=3.2,
     )
@@ -107,11 +107,15 @@ def test_results_payload_has_required_keys_and_no_resume_text():
         "warmup_seconds",
         "per_resume",
         "failures",
+        "failed_seconds",
         "aggregate",
     }
     assert payload["per_resume"] == {"prac_001": {"skills": ["python", "sql"], "seconds": 1.5}}
     assert payload["failures"] == {"prac_006": "Ollama returned an empty response"}
+    assert payload["failed_seconds"] == {"prac_006": 300.0}
     assert payload["aggregate"]["total_candidate"] == 2
+    assert payload["aggregate"]["latency_median_seconds"] == 1.5
+    assert payload["aggregate"]["latency_max_seconds"] == 1.5
 
     # Round-trips through JSON (what write_results_file actually writes).
     json.dumps(payload)

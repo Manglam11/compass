@@ -19,3 +19,5 @@ extract:
     temperature: 0
     seed: 42
     prompt_version: rung3_v1
+    # 59 skill ids fit in well under 1024 tokens; the cap exists to end repetition loops fast.
+    num_predict: 1024

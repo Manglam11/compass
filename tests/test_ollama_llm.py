@@ -26,23 +26,30 @@ class FakeMessage:
 
 
 class FakeResponse:
-    def __init__(self, content: str | None):
+    def __init__(self, content: str | None, done_reason: str = "stop"):
         self.message = FakeMessage(content)
+        self.done_reason = done_reason
 
 
 class FakeClient:
     """Stand-in for ollama.Client. Records every chat() call for inspection."""
 
-    def __init__(self, content: str | None = None, raise_exc: Exception | None = None):
+    def __init__(
+        self,
+        content: str | None = None,
+        raise_exc: Exception | None = None,
+        done_reason: str = "stop",
+    ):
         self._content = content
         self._raise_exc = raise_exc
+        self._done_reason = done_reason
         self.calls: list[dict] = []
 
     def chat(self, **kwargs):
         self.calls.append(kwargs)
         if self._raise_exc is not None:
             raise self._raise_exc
-        return FakeResponse(self._content)
+        return FakeResponse(self._content, done_reason=self._done_reason)
 
 
 def _install_fake_client(monkeypatch, client: FakeClient) -> FakeClient:
@@ -168,3 +175,37 @@ def test_config_values_are_passed_to_client(monkeypatch):
     assert call["options"]["seed"] == 7
     assert call["options"]["temperature"] == 0
     assert call["think"] is False
+
+
+def test_num_predict_from_config_is_passed_to_client(monkeypatch):
+    monkeypatch.setattr(
+        ollama_llm,
+        "load_default_yaml",
+        lambda: {"extract": {"rung3": {"num_predict": 2048}}},
+    )
+    client = _install_fake_client(
+        monkeypatch, FakeClient(content=json.dumps({"skills_present": []}))
+    )
+
+    ollama_llm.extract_skills("some resume text", TAXONOMY)
+
+    assert len(client.calls) == 1
+    assert client.calls[0]["options"]["num_predict"] == 2048
+
+
+def test_done_reason_length_raises_typed_error_even_with_valid_json(monkeypatch):
+    content = json.dumps({"skills_present": ["python"]})
+    _install_fake_client(monkeypatch, FakeClient(content=content, done_reason="length"))
+
+    with pytest.raises(ollama_llm.Rung3ExtractionError, match="num_predict cap") as exc_info:
+        ollama_llm.extract_skills("some resume text", TAXONOMY)
+    assert "qwen3:8b" in str(exc_info.value)
+
+
+def test_done_reason_stop_with_valid_json_is_normal_result(monkeypatch):
+    content = json.dumps({"skills_present": ["python", "sql"]})
+    _install_fake_client(monkeypatch, FakeClient(content=content, done_reason="stop"))
+
+    result = ollama_llm.extract_skills("some resume text", TAXONOMY)
+
+    assert result == ["python", "sql"]

@@ -29,6 +29,7 @@ DEFAULTS: dict[str, Any] = {
     "temperature": 0,
     "seed": 42,
     "prompt_version": "rung3_v1",
+    "num_predict": 1024,
 }
 
 
@@ -98,6 +99,7 @@ def extract_skills(text: str, taxonomy: Taxonomy, *, model: str | None = None) -
                 "temperature": config["temperature"],
                 "seed": config["seed"],
                 "num_ctx": config["num_ctx"],
+                "num_predict": config["num_predict"],
             },
             think=False,
         )
@@ -106,6 +108,12 @@ def extract_skills(text: str, taxonomy: Taxonomy, *, model: str | None = None) -
             f"Ollama request to model {effective_model!r} at {config['host']} failed "
             f"(server not running, or timed out after {config['timeout_seconds']}s): {exc}"
         ) from exc
+
+    if response.done_reason == "length":
+        raise Rung3ExtractionError(
+            f"Ollama model {effective_model!r} output hit num_predict cap "
+            f"(probable repetition loop)"
+        )
 
     content = response.message.content
     if not content:

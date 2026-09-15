@@ -12,6 +12,7 @@ from pathlib import Path
 import pytest
 
 from compass.eval.extraction import (
+    failed_seconds,
     get_server_version,
     latency_summary,
     load_resume_texts,
@@ -97,6 +98,32 @@ def test_latency_summary_median_and_max_on_fixed_timings():
 
 def test_latency_summary_empty_is_zero():
     assert latency_summary({}) == (0.0, 0.0)
+
+
+def test_latency_summary_excludes_failed_calls():
+    # prac_002's 300s is a timed-out repetition loop, not a real latency
+    # sample -- it must not drag the median/max up.
+    seconds = {"prac_001": 1.0, "prac_002": 300.0, "prac_003": 3.0}
+    failures = {"prac_002": "output hit num_predict cap (probable repetition loop)"}
+
+    median, maximum = latency_summary(seconds, failures)
+
+    assert median == 2.0
+    assert maximum == 3.0
+
+
+def test_latency_summary_all_failed_is_zero():
+    seconds = {"prac_001": 300.0}
+    failures = {"prac_001": "timed out"}
+
+    assert latency_summary(seconds, failures) == (0.0, 0.0)
+
+
+def test_failed_seconds_reports_only_failed_keys():
+    seconds = {"prac_001": 1.0, "prac_002": 300.0}
+    failures = {"prac_002": "timed out"}
+
+    assert failed_seconds(seconds, failures) == {"prac_002": 300.0}
 
 
 def test_get_server_version_returns_none_when_unreachable(monkeypatch):

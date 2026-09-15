@@ -27,6 +27,7 @@ from typing import Any
 from compass.eval.agreement import AggregateAgreement, PerResumeAgreement, compute_agreement
 from compass.eval.extraction import (
     Rung3Results,
+    failed_seconds,
     get_server_version,
     latency_summary,
     load_resume_extractions,
@@ -234,7 +235,9 @@ def build_results_payload(
     """JSON-serialisable rung 3 run record. Skill ids and resume ids only --
     never resume text.
     """
-    median_seconds, max_seconds = latency_summary(rung3_result.seconds_by_resume)
+    median_seconds, max_seconds = latency_summary(
+        rung3_result.seconds_by_resume, rung3_result.failures
+    )
 
     per_resume = {
         key: {
@@ -254,6 +257,7 @@ def build_results_payload(
         "warmup_seconds": rung3_result.warmup_seconds,
         "per_resume": per_resume,
         "failures": rung3_result.failures,
+        "failed_seconds": failed_seconds(rung3_result.seconds_by_resume, rung3_result.failures),
         "aggregate": {
             **asdict(aggregate),
             "latency_median_seconds": median_seconds,
@@ -334,11 +338,14 @@ def main(argv: list[str] | None = None) -> int:
 
         if rung3_result.failures:
             print(f"  failures: {len(rung3_result.failures)}")
+            failure_seconds = failed_seconds(rung3_result.seconds_by_resume, rung3_result.failures)
             for key, message in sorted(rung3_result.failures.items()):
-                print(f"    {key}: {message}")
+                print(f"    {key} ({failure_seconds[key]:.2f}s): {message}")
 
-        median_seconds, max_seconds = latency_summary(rung3_result.seconds_by_resume)
-        print(f"  latency: median={median_seconds:.2f}s max={max_seconds:.2f}s")
+        median_seconds, max_seconds = latency_summary(
+            rung3_result.seconds_by_resume, rung3_result.failures
+        )
+        print(f"  latency (successful calls): median={median_seconds:.2f}s max={max_seconds:.2f}s")
 
         config = ollama_llm.rung3_config()
         payload = build_results_payload(

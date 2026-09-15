@@ -108,12 +108,27 @@ def run_rung3(
     )
 
 
-def latency_summary(seconds_by_resume: dict[str, float]) -> tuple[float, float]:
-    """(median, max) of per-resume seconds. (0.0, 0.0) if there are none."""
-    values = list(seconds_by_resume.values())
+def latency_summary(
+    seconds_by_resume: dict[str, float], failures: dict[str, str] | None = None
+) -> tuple[float, float]:
+    """(median, max) of per-resume seconds for successful calls only -- a
+    timed-out failure (e.g. a repetition loop that ran to the timeout) must
+    not distort these numbers. (0.0, 0.0) if there are no successful calls.
+    """
+    failed_keys = set(failures) if failures else set()
+    values = [seconds for key, seconds in seconds_by_resume.items() if key not in failed_keys]
     if not values:
         return 0.0, 0.0
     return statistics.median(values), max(values)
+
+
+def failed_seconds(
+    seconds_by_resume: dict[str, float], failures: dict[str, str]
+) -> dict[str, float]:
+    """Per-resume seconds for failed calls only, reported separately from
+    latency_summary so a timeout doesn't hide inside median/max.
+    """
+    return {key: seconds_by_resume[key] for key in failures}
 
 
 def get_server_version(host: str, timeout_seconds: float = 5.0) -> str | None:
