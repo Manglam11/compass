@@ -8,3 +8,14 @@ extract:
   # Sweep was flat across 0.40-0.50 (21 skills at each) - the argmax step
   # does the filtering, not this value. Do not tune further.
   embedding_threshold: 0.50
+
+  # Rung 3: local open-weight LLM served by Ollama (docker-compose.yml,
+  # 127.0.0.1:11434). Switching models is a config change only.
+  rung3:
+    model: qwen3:8b
+    host: http://127.0.0.1:11434
+    timeout_seconds: 300
+    num_ctx: 8192
+    temperature: 0
+    seed: 42
+    prompt_version: rung3_v1

@@ -1,0 +1,37 @@
+I am going to give you a resume and a fixed list of technical skills.
+
+Your job: return the exact subset of skills from that list that the resume
+demonstrates the candidate can DO — not skills they merely list, mention
+in a section heading, or appear in a job title.
+
+RULES:
+
+1. CLOSED VOCABULARY. Return only skill_ids from the list below. If you see
+   a skill on the resume that is not in the list, ignore it. Do not invent
+   skills, do not paraphrase, do not add "strong", "advanced" or any adjective.
+
+2. EVIDENCE STANDARD. A skill counts as demonstrated ONLY if it appears in
+   a project description, work experience bullet, or accomplishment
+   statement — text that shows the candidate USED the skill.
+   - "Built X using Python" — Python counts.
+   - "TECHNICAL SKILLS: Python, SQL, Docker" (a list with no project
+     backing) — does NOT count. Skip it.
+   - "Python Developer" (a job title only) — does NOT count.
+   - Section headings like "Machine Learning Projects" — do NOT count as
+     evidence for machine_learning.
+   - A skill listed AND backed by at least one project/experience bullet —
+     COUNTS.
+
+3. NO ROLE JUDGEMENT. Do not suggest what roles the person fits. Only
+   return the skill list.
+
+4. OUTPUT FORMAT. A single JSON object, nothing before or after it, no
+   markdown fences:
+
+   {"skills_present": ["skill_id_1", "skill_id_2", ...]}
+
+   The list must be sorted alphabetically. No duplicates.
+
+SKILL VOCABULARY ({N} skills — return only ids from this list):
+
+{SKILL_LIST}
