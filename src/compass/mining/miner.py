@@ -122,7 +122,7 @@ def run_mining_batch(
         if skill_id not in valid_ids:
             raise MiningBatchError(
                 f"proposal[{i}] has skill_id {skill_id!r}, outside the taxonomy's "
-                f"{len(skill_ids)} ids plus \"NEW\""
+                f'{len(skill_ids)} ids plus "NEW"'
             )
 
         records.append(

@@ -109,9 +109,7 @@ def test_load_corpus_dedupes_after_mojibake_fix(tmp_path):
 
 
 def test_batch_resumes_char_budget_splits_on_boundary():
-    resumes = [
-        CorpusResume(resume_id=str(i), category="c", text="x" * 4000) for i in range(5)
-    ]
+    resumes = [CorpusResume(resume_id=str(i), category="c", text="x" * 4000) for i in range(5)]
 
     batches = batch_resumes(resumes, char_budget=10000)
 

@@ -32,8 +32,7 @@ def _resumes_block(batch: list[CorpusResume]) -> str:
     parts = []
     for resume in batch:
         parts.append(
-            f"--- resume_id: {resume.resume_id} (category: {resume.category}) ---\n"
-            f"{resume.text}"
+            f"--- resume_id: {resume.resume_id} (category: {resume.category}) ---\n{resume.text}"
         )
     return "\n\n".join(parts)
 
