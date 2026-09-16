@@ -1,4 +1,4 @@
-version: 0.6.0
+version: 0.7.0
 skills:
   # language
   - id: python
@@ -9,17 +9,17 @@ skills:
   - id: sql
     display_name: SQL
     family: language
-    aliases: [sql, structured query language, t-sql, tsql, pl/sql, plsql]
+    aliases: [sql, structured query language, t-sql, tsql, pl/sql, plsql, sql server]
     description: Writing queries to retrieve, join, and aggregate data stored in relational databases.
   - id: javascript
     display_name: JavaScript
     family: language
-    aliases: [javascript, js, ecmascript, es6, node.js, nodejs, node]
+    aliases: [javascript, js, ecmascript, es6, node.js, nodejs, node, jquery, java script]
     description: Building interactive web front ends and server-side services with a dynamic scripting language and its runtime.
   - id: bash
     display_name: Bash
     family: language
-    aliases: [bash, bash scripting, shell scripting, shell script, sh]
+    aliases: [bash, bash scripting, shell scripting, shell script, sh, shell scripts]
     description: Automating command-line tasks and system operations by writing shell scripts.
 
   # data
@@ -41,7 +41,7 @@ skills:
   - id: mysql
     display_name: MySQL
     family: data
-    aliases: [mysql, my sql]
+    aliases: [mysql, my sql, mysql database]
     description: Storing and querying relational data using a fast, widely deployed relational database system.
   - id: mongodb
     display_name: MongoDB
@@ -96,6 +96,8 @@ skills:
         sqlalchemy,
         ingestion pipeline,
         migration script,
+        sqoop,
+        etl developer,
       ]
     description: Building pipelines that pull data from source systems, transform it, and load it into target destinations.
   - id: data_visualisation
@@ -115,7 +117,7 @@ skills:
   - id: excel
     display_name: Excel
     family: data
-    aliases: [excel, microsoft excel, spreadsheets, vlookup, pivot tables]
+    aliases: [excel, microsoft excel, spreadsheets, vlookup, pivot tables, ms office, ms excel]
     description: Analyzing data and building reports using formulas, lookup functions, and pivot tables in spreadsheet software.
   - id: tableau
     display_name: Tableau
@@ -185,7 +187,7 @@ skills:
   - id: computer_vision
     display_name: Computer Vision
     family: ml
-    aliases: [computer_vision, computer vision, cv, opencv, image processing]
+    aliases: [computer_vision, computer vision, cv, opencv, image processing, open cv]
     description: Analyzing images or video to detect, classify, or extract visual information programmatically.
   - id: time_series
     display_name: Time Series

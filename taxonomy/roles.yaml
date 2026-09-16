@@ -1,5 +1,5 @@
-version: 0.6.0
-taxonomy_version: 0.6.0
+version: 0.7.0
+taxonomy_version: 0.7.0
 roles:
   - id: data_analyst
     display_name: Data Analyst
