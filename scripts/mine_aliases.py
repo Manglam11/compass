@@ -31,7 +31,7 @@ ROOT = Path(__file__).resolve().parent.parent
 TAXONOMY_DIR = ROOT / "taxonomy"
 CORPUS_PATH = ROOT / "corpus" / "UpdatedResumeDataSet.csv"
 DEFAULT_OUTPUT = ROOT / "corpus" / "proposals_raw.json"
-CHAR_BUDGET = 15000
+CHAR_BUDGET = 9000
 MODEL_CHOICES = ("qwen3:8b", "gemma4:e4b")
 
 
@@ -51,6 +51,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         type=Path,
         default=DEFAULT_OUTPUT,
         help=f"Output JSON path (default: {DEFAULT_OUTPUT}).",
+    )
+    parser.add_argument(
+        "--char-budget",
+        type=int,
+        default=CHAR_BUDGET,
+        help=f"Max characters per batch (default: {CHAR_BUDGET}).",
     )
     return parser.parse_args(argv)
 
@@ -91,7 +97,7 @@ def main(argv: list[str] | None = None) -> int:
     resumes, duplicate_count = load_corpus(CORPUS_PATH)
     print(f"loaded {len(resumes)} unique resumes ({duplicate_count} duplicates dropped)")
 
-    batches = batch_resumes(resumes, char_budget=CHAR_BUDGET)
+    batches = batch_resumes(resumes, char_budget=args.char_budget)
     if args.limit_batches is not None:
         batches = batches[: args.limit_batches]
     total = len(batches)

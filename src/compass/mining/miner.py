@@ -23,7 +23,7 @@ from compass.taxonomy.models import Taxonomy
 # Mining batches are much larger prompts than rung 3 single-resume extraction
 # and the response is a list of proposals rather than one skills_present
 # array, so it needs far more headroom than rung3's 1024 cap.
-NUM_PREDICT = 3000
+NUM_PREDICT = 4096
 
 _REQUIRED_KEYS = ("resume_id", "skill_id", "quoted_phrase")
 
