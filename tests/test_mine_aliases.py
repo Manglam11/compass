@@ -115,9 +115,7 @@ def test_batch_failure_is_logged_and_run_continues(tmp_path, monkeypatch, capsys
     monkeypatch.setattr(mine_aliases, "load_corpus", lambda path: (resumes, 0))
     monkeypatch.setattr(mine_aliases, "batch_resumes", lambda resumes, char_budget: batches)
     monkeypatch.setattr(mine_aliases.ollama, "Client", lambda host, timeout: object())
-    monkeypatch.setattr(
-        mine_aliases, "load_taxonomy", lambda skills_path, roles_path: object()
-    )
+    monkeypatch.setattr(mine_aliases, "load_taxonomy", lambda skills_path, roles_path: object())
 
     call_count = {"n": 0}
 
@@ -137,9 +135,9 @@ def test_batch_failure_is_logged_and_run_continues(tmp_path, monkeypatch, capsys
 
     monkeypatch.setattr(mine_aliases, "run_mining_batch", fake_run_mining_batch)
 
-    exit_code = mine_aliases.main(["--model", "qwen3:8b", "--output", str(output_path)])
+    exit_code = mine_aliases.main(["--model", "gemma4:e4b", "--output", str(output_path)])
 
-    assert exit_code == 0
+    assert exit_code == 1
     assert call_count["n"] == 3
 
     data = json.loads(output_path.read_text(encoding="utf-8"))
@@ -148,3 +146,99 @@ def test_batch_failure_is_logged_and_run_continues(tmp_path, monkeypatch, capsys
     out = capsys.readouterr().out
     assert "FAILED" in out
     assert "boom on batch 1" in out
+
+    manifest_path = tmp_path / "proposals_raw.manifest.json"
+    assert manifest_path.exists()
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+
+    assert manifest["batches_total"] == 3
+    assert manifest["batches_ok"] == 2
+    assert manifest["batches_failed"] == 1
+    assert manifest["proposals_count"] == 2
+    assert manifest["model"] == "gemma4:e4b"
+    assert [f["batch_index"] for f in manifest["failures"]] == [1]
+    assert manifest["failures"][0]["error_type"] == "MiningBatchError"
+    assert "boom on batch 1" in manifest["failures"][0]["message"]
+
+
+def test_manifest_written_when_all_batches_fail(tmp_path, monkeypatch):
+    """All batches fail: no proposals are ever appended, but the manifest and
+    an empty proposals file must still exist -- a fully failed run must not
+    look like a run that never happened.
+    """
+    output_path = tmp_path / "proposals_raw.json"
+
+    resumes = [f"resume-{i}" for i in range(2)]
+    batches = [[r] for r in resumes]
+
+    monkeypatch.setattr(mine_aliases, "load_corpus", lambda path: (resumes, 1))
+    monkeypatch.setattr(mine_aliases, "batch_resumes", lambda resumes, char_budget: batches)
+    monkeypatch.setattr(mine_aliases.ollama, "Client", lambda host, timeout: object())
+    monkeypatch.setattr(mine_aliases, "load_taxonomy", lambda skills_path, roles_path: object())
+
+    def fake_run_mining_batch(batch, taxonomy, model, client, *, batch_index):
+        raise MiningBatchError(f"boom on batch {batch_index}")
+
+    monkeypatch.setattr(mine_aliases, "run_mining_batch", fake_run_mining_batch)
+
+    exit_code = mine_aliases.main(["--model", "gemma4:e4b", "--output", str(output_path)])
+
+    assert exit_code == 1
+
+    assert output_path.exists()
+    assert json.loads(output_path.read_text(encoding="utf-8")) == []
+
+    manifest_path = tmp_path / "proposals_raw.manifest.json"
+    assert manifest_path.exists()
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+
+    assert manifest["batches_total"] == 2
+    assert manifest["batches_ok"] == 0
+    assert manifest["batches_failed"] == 2
+    assert manifest["proposals_count"] == 0
+    assert manifest["model"] == "gemma4:e4b"
+    assert [f["batch_index"] for f in manifest["failures"]] == [0, 1]
+    assert all(f["error_type"] == "MiningBatchError" for f in manifest["failures"])
+    assert manifest["corpus"] == {"rows_total": 3, "rows_unique_after_dedup": 2}
+    assert manifest["config"]["char_budget"] == mine_aliases.CHAR_BUDGET
+    assert manifest["config"]["num_predict"] == mine_aliases.NUM_PREDICT
+    assert manifest["started_at"] <= manifest["finished_at"]
+    assert "git_head" in manifest
+
+
+def test_manifest_all_batches_succeed(tmp_path, monkeypatch):
+    output_path = tmp_path / "proposals_raw.json"
+
+    resumes = [f"resume-{i}" for i in range(2)]
+    batches = [[r] for r in resumes]
+
+    monkeypatch.setattr(mine_aliases, "load_corpus", lambda path: (resumes, 0))
+    monkeypatch.setattr(mine_aliases, "batch_resumes", lambda resumes, char_budget: batches)
+    monkeypatch.setattr(mine_aliases.ollama, "Client", lambda host, timeout: object())
+    monkeypatch.setattr(mine_aliases, "load_taxonomy", lambda skills_path, roles_path: object())
+
+    def fake_run_mining_batch(batch, taxonomy, model, client, *, batch_index):
+        return [
+            ProposalRecord(
+                resume_id=f"r{batch_index}",
+                skill_id="python",
+                quoted_phrase="Py",
+                model=model,
+                batch_index=batch_index,
+            )
+        ]
+
+    monkeypatch.setattr(mine_aliases, "run_mining_batch", fake_run_mining_batch)
+
+    exit_code = mine_aliases.main(["--model", "gemma4:e4b", "--output", str(output_path)])
+
+    assert exit_code == 0
+
+    manifest_path = tmp_path / "proposals_raw.manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+
+    assert manifest["batches_total"] == 2
+    assert manifest["batches_ok"] == 2
+    assert manifest["batches_failed"] == 0
+    assert manifest["failures"] == []
+    assert manifest["proposals_count"] == 2
