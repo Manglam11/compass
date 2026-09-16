@@ -9,6 +9,10 @@ cp1252 a second time), producing mojibake like "NaÃƒÂ¯ve" for "Naïve".
 _fix_mojibake reverses that by re-encoding as cp1252 and decoding as UTF-8,
 repeating while that keeps changing the text and stays a valid decode.
 
+The corpus also contains a large number of exact-duplicate resumes (post-fix
+text match). load_corpus drops later duplicates, keeping the first occurrence
+by original row order, and reports how many were dropped.
+
 ftfy is not a dependency of this project, so this fixer is deliberately
 narrow: it only reverses the cp1252-as-UTF-8 round trip and gives up
 (leaving the text untouched) on anything else. A meaningful fraction of rows
@@ -48,22 +52,54 @@ def _fix_mojibake(text: str) -> str:
     return text
 
 
-def load_corpus(path: Path) -> list[CorpusResume]:
+def load_corpus(path: Path) -> tuple[list[CorpusResume], int]:
+    """Load the corpus, deduping exact-text duplicates.
+
+    Returns (unique resumes, number of duplicate rows dropped). Dedup keys on
+    the post-mojibake-fix text; the first occurrence in original row order is
+    kept, later duplicates are dropped.
+    """
     with path.open("r", encoding="utf-8", newline="") as f:
         rows = list(csv.DictReader(f))
 
     width = max(4, len(str(len(rows) - 1))) if rows else 4
-    return [
-        CorpusResume(
-            resume_id=str(i).zfill(width),
-            category=row["Category"],
-            text=_fix_mojibake(row["Resume"]),
+    seen_text: set[str] = set()
+    resumes: list[CorpusResume] = []
+    duplicate_count = 0
+    for i, row in enumerate(rows):
+        text = _fix_mojibake(row["Resume"])
+        if text in seen_text:
+            duplicate_count += 1
+            continue
+        seen_text.add(text)
+        resumes.append(
+            CorpusResume(
+                resume_id=str(i).zfill(width),
+                category=row["Category"],
+                text=text,
+            )
         )
-        for i, row in enumerate(rows)
-    ]
+    return resumes, duplicate_count
 
 
 def batch_resumes(
-    resumes: list[CorpusResume], batch_size: int = 10
+    resumes: list[CorpusResume], char_budget: int = 15000
 ) -> list[list[CorpusResume]]:
-    return [resumes[i : i + batch_size] for i in range(0, len(resumes), batch_size)]
+    """Group resumes into batches whose total text length stays within
+    char_budget, preserving order. A single resume longer than char_budget
+    becomes its own solo batch rather than being split or crashing.
+    """
+    batches: list[list[CorpusResume]] = []
+    current: list[CorpusResume] = []
+    current_len = 0
+    for resume in resumes:
+        text_len = len(resume.text)
+        if current and current_len + text_len > char_budget:
+            batches.append(current)
+            current = []
+            current_len = 0
+        current.append(resume)
+        current_len += text_len
+    if current:
+        batches.append(current)
+    return batches
